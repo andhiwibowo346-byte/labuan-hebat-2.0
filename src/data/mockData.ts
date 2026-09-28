@@ -12,8 +12,8 @@ import {
 
 export const CURRENT_USER: UserProfile = {
   id: 'usr-001',
-  name: 'Andhi Yanto',
-  email: 'andhi.yanto@perusahaan.co.id',
+  name: 'Administrator',
+  email: 'admin@labuanhebat.id',
   role: 'super_admin',
   nip: '00385617',
   department: 'Information Technology',
@@ -1212,62 +1212,7 @@ export const INITIAL_MAINTENANCE_RECORDS: MaintenanceRecord[] = [
   },
 ];
 
-export const INITIAL_ASSET_HISTORY: AssetHistory[] = [
-  {
-    id: 'his-001',
-    asset_id: 'ast-001',
-    user_name: 'Andhi Yanto',
-    action: 'update',
-    field_changed: 'IP Address',
-    old_value: '10.10.10.20',
-    new_value: '10.10.10.10',
-    remarks: 'Penyesuaian subnet IP VLAN khusus perbankan',
-    created_at: '2026-09-24T14:20:00Z',
-  },
-  {
-    id: 'his-002',
-    asset_id: 'ast-001',
-    user_name: 'Andhi Yanto',
-    action: 'status_change',
-    field_changed: 'Status',
-    old_value: 'Maintenance',
-    new_value: 'Active',
-    remarks: 'Mesin telah online dan siap melayani transaksi nasabah',
-    created_at: '2026-09-24T14:25:00Z',
-  },
-  {
-    id: 'his-003',
-    asset_id: 'ast-001',
-    user_name: 'Budi Santoso',
-    action: 'upload_photo',
-    field_changed: 'Foto Aset',
-    new_value: 'Foto Instalasi Kabel & Modem Seluler',
-    remarks: 'Menambahkan dokumentasi kondisi fisik terpasang di lokasi',
-    created_at: '2026-09-24T14:30:00Z',
-  },
-  {
-    id: 'his-004',
-    asset_id: 'ast-005',
-    user_name: 'Rizki Pratama',
-    action: 'status_change',
-    field_changed: 'Status',
-    old_value: 'Active',
-    new_value: 'Maintenance',
-    remarks: 'Kartu nasabah tersendat di card reader, unit dinonaktifkan sementara',
-    created_at: '2026-09-24T08:35:00Z',
-  },
-  {
-    id: 'his-005',
-    asset_id: 'ast-008',
-    user_name: 'Andhi Yanto',
-    action: 'status_change',
-    field_changed: 'Status',
-    old_value: 'Active',
-    new_value: 'Damaged',
-    remarks: 'Power Supply terbakar akibat korsleting instalasi gedung',
-    created_at: '2026-09-24T11:00:00Z',
-  },
-];
+export const INITIAL_ASSET_HISTORY: AssetHistory[] = [];
 
 export const INITIAL_NOTIFICATIONS: AppNotification[] = [
   {

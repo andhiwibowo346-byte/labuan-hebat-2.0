@@ -172,6 +172,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   }, [themeMode]);
 
+  // Reset initial cache to ensure clean start (no auto-login, clean history)
+  if (typeof window !== 'undefined' && localStorage.getItem('itam_v2_init') !== 'clean_v2') {
+    localStorage.removeItem('itam_auth_user');
+    localStorage.removeItem('itam_user_role');
+    localStorage.removeItem('itam_asset_history');
+    localStorage.setItem('itam_v2_init', 'clean_v2');
+  }
+
   // Users list with LocalStorage persistence
   const [usersList, setUsersList] = useState<UserProfile[]>(() => {
     const saved = localStorage.getItem('itam_users_list');
@@ -185,7 +193,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return MOCK_USERS;
   });
 
-  // Current logged in user
+  // Current logged in user (starts logged out / null by default)
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => {
     const savedAuth = localStorage.getItem('itam_auth_user');
     if (savedAuth) {
@@ -195,8 +203,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         console.error('Failed to parse auth user', e);
       }
     }
-    // Default logged in user (Super Admin)
-    return CURRENT_USER;
+    return null;
   });
 
   const isAuthenticated = Boolean(currentUser);

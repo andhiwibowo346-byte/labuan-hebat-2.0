@@ -37,9 +37,9 @@ export const LoginView: React.FC = () => {
 
   const [activeMode, setActiveMode] = useState<'login' | 'register' | 'demo'>('login');
 
-  // Login form state
-  const [identifier, setIdentifier] = useState('andhi.yanto@perusahaan.co.id');
-  const [password, setPassword] = useState('admin123');
+  // Login form state (empty by default)
+  const [identifier, setIdentifier] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
@@ -315,9 +315,6 @@ export const LoginView: React.FC = () => {
                   <label className="block text-xs font-semibold text-slate-300">
                     Kata Sandi
                   </label>
-                  <span className="text-[11px] text-slate-400">
-                    Default demo: <code className="text-brand-400">admin123</code>
-                  </span>
                 </div>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
@@ -327,7 +324,7 @@ export const LoginView: React.FC = () => {
                     type={showPassword ? 'text' : 'password'}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••"
+                    placeholder="Masukkan kata sandi akun Anda"
                     className="w-full pl-10 pr-10 py-2.5 bg-slate-950/60 border border-slate-800 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all"
                     required
                   />
@@ -358,16 +355,6 @@ export const LoginView: React.FC = () => {
                   </>
                 )}
               </button>
-
-              <div className="text-center pt-2">
-                <button
-                  type="button"
-                  onClick={() => setActiveMode('demo')}
-                  className="text-xs text-brand-400 hover:text-brand-300 transition-colors font-medium"
-                >
-                  Atau klik di sini untuk pilih akun demo dengan 1-klik ⚡
-                </button>
-              </div>
             </form>
           )}
 
