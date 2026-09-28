@@ -1,32 +1,23 @@
-# React + TypeScript + Vite
+# labuan-hebat-2.0
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Sistem Manajemen Aset TI (IT Asset Management - ITAM) Labuan Hebat 2.0.
 
-Currently, two official plugins are available:
+Aplikasi berbasis web modern untuk pengelolaan, inventarisasi, pemeliharaan, serta pencetakan label QR Code untuk aset teknologi informasi.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Fitur Utama
 
-## React Compiler
+- **Dashboard Interaktif**: Statistik real-time nilai aset, status operasional, depresiasi, dan grafik analitik.
+- **Manajemen Aset Komprehensif**: Inventaris hardware, software, lisensi, dan periferal lengkap dengan QR Code.
+- **Pemeliharaan & Riwayat**: Penjadwalan pemeliharaan berkala, pencatatan servis, dan tracking log insiden.
+- **Pencetakan Label QR**: Cetak label barcode/QR code batch untuk ditempelkan pada perangkat fisik.
+- **Import & Export Cepat**: Dukungan import data via Excel (.xlsx) serta export laporan ke format PDF dan Excel.
+- **Mode Tampilan**: Dukungan tema Light Mode dan Dark Mode yang elegan.
+- **Integrasi Database**: Terkoneksi dengan Supabase Backend & REST API.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Teknologi
 
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
-```
-
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+- **Frontend**: React 19 + TypeScript + Vite
+- **Styling**: Tailwind CSS
+- **Backend / Database**: Supabase
+- **Icons**: Lucide React
+- **Export & Utility**: SheetJS (XLSX), jsPDF, qrcode.react
