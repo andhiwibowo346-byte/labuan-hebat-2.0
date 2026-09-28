@@ -18,6 +18,9 @@ export const CURRENT_USER: UserProfile = {
   nip: '00385617',
   department: 'Information Technology',
   avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
+  password: 'admin123',
+  status: 'active',
+  created_at: '2026-01-15T08:00:00Z',
 };
 
 export const MOCK_USERS: UserProfile[] = [
@@ -30,6 +33,9 @@ export const MOCK_USERS: UserProfile[] = [
     nip: '00385610',
     department: 'IT Infrastructure',
     avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
+    password: 'admin123',
+    status: 'active',
+    created_at: '2026-02-01T09:30:00Z',
   },
   {
     id: 'usr-003',
@@ -39,6 +45,9 @@ export const MOCK_USERS: UserProfile[] = [
     nip: '00385615',
     department: 'Hardware Maintenance',
     avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80',
+    password: 'admin123',
+    status: 'active',
+    created_at: '2026-02-15T10:15:00Z',
   },
   {
     id: 'usr-004',
@@ -48,6 +57,9 @@ export const MOCK_USERS: UserProfile[] = [
     nip: '00385620',
     department: 'Audit & Compliance',
     avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80',
+    password: 'admin123',
+    status: 'active',
+    created_at: '2026-03-01T11:00:00Z',
   },
 ];
 

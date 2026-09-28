@@ -67,8 +67,8 @@ export const ITTutorialView: React.FC = () => {
   ]);
 
   const canManageTutorials =
-    currentUser.role === 'super_admin' ||
-    currentUser.role === 'it_admin' ||
+    currentUser?.role === 'super_admin' ||
+    currentUser?.role === 'it_admin' ||
     hasPermission('manage_assets');
 
   const filteredTutorials = useMemo(() => {

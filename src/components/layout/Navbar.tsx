@@ -15,6 +15,9 @@ import {
   GraduationCap,
   Laptop,
   Check,
+  LogOut,
+  UserCog,
+  ChevronDown,
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { UserRole } from '../../types';
@@ -28,6 +31,8 @@ interface NavbarProps {
 export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, onOpenGlobalSearch }) => {
   const {
     currentUser,
+    logout,
+    hasPermission,
     switchUserRole,
     isDarkMode,
     themeMode,
@@ -44,10 +49,12 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, onOpenGlobalSea
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const [isRoleOpen, setIsRoleOpen] = useState(false);
   const [isThemeOpen, setIsThemeOpen] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
   const notifRef = useRef<HTMLDivElement>(null);
   const roleRef = useRef<HTMLDivElement>(null);
   const themeRef = useRef<HTMLDivElement>(null);
+  const userMenuRef = useRef<HTMLDivElement>(null);
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
@@ -62,6 +69,9 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, onOpenGlobalSea
       }
       if (themeRef.current && !themeRef.current.contains(e.target as Node)) {
         setIsThemeOpen(false);
+      }
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+        setIsUserMenuOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -173,7 +183,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, onOpenGlobalSea
             >
               <span className="w-2 h-2 rounded-full bg-brand-500 animate-pulse"></span>
               <span className="hidden md:inline uppercase text-[11px] tracking-wider text-slate-400">Role:</span>
-              <span className="capitalize">{currentUser.role.replace('_', ' ')}</span>
+              <span className="capitalize">{currentUser?.role ? currentUser.role.replace('_', ' ') : 'Guest'}</span>
             </button>
 
             {isRoleOpen && (
@@ -185,7 +195,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, onOpenGlobalSea
                 <div className="space-y-1">
                   {rolesList.map((r) => {
                     const Icon = r.icon;
-                    const isActive = currentUser.role === r.role;
+                    const isActive = currentUser?.role === r.role;
                     return (
                       <button
                         key={r.role}
@@ -411,20 +421,92 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, onOpenGlobalSea
             )}
           </div>
 
-          {/* User profile pill */}
-          <div className="flex items-center gap-2 pl-2 border-l border-slate-200 dark:border-slate-800">
-            <img
-              src={currentUser.avatar}
-              alt={currentUser.name}
-              className="w-8 h-8 rounded-full object-cover ring-2 ring-brand-500/20"
-            />
-            <div className="hidden xl:block text-left">
-              <p className="text-xs font-semibold text-slate-800 dark:text-slate-200 leading-none">
-                {currentUser.name}
-              </p>
-              <p className="text-[10px] text-slate-400 mt-0.5">NIP: {currentUser.nip}</p>
+          {/* User profile dropdown */}
+          {currentUser && (
+            <div className="relative pl-2 border-l border-slate-200 dark:border-slate-800" ref={userMenuRef}>
+              <button
+                type="button"
+                onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                className="flex items-center gap-2 p-1.5 rounded-2xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-left"
+              >
+                <img
+                  src={currentUser.avatar}
+                  alt={currentUser.name}
+                  className="w-8 h-8 rounded-full object-cover ring-2 ring-brand-500/20"
+                />
+                <div className="hidden xl:block text-left">
+                  <p className="text-xs font-semibold text-slate-800 dark:text-slate-200 leading-none">
+                    {currentUser.name}
+                  </p>
+                  <p className="text-[10px] text-slate-400 mt-0.5">NIP: {currentUser.nip || '-'}</p>
+                </div>
+                <ChevronDown className="w-3.5 h-3.5 text-slate-400 hidden xl:block" />
+              </button>
+
+              {isUserMenuOpen && (
+                <div className="absolute right-0 mt-2 w-64 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xl p-2 z-50 animate-scale-up">
+                  {/* User info header */}
+                  <div className="p-3 border-b border-slate-100 dark:border-slate-800 mb-1">
+                    <p className="text-xs font-bold text-slate-900 dark:text-white">
+                      {currentUser.name}
+                    </p>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
+                      {currentUser.email}
+                    </p>
+                    <div className="mt-2 flex items-center gap-1.5">
+                      <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-brand-500/10 text-brand-600 dark:text-brand-400 border border-brand-500/20 uppercase tracking-wider">
+                        {currentUser.role.replace('_', ' ')}
+                      </span>
+                      {currentUser.department && (
+                        <span className="text-[10px] text-slate-400 truncate">
+                          • {currentUser.department}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Navigation links */}
+                  {hasPermission('manage_users') && (
+                    <button
+                      onClick={() => {
+                        setActiveTab('user_management');
+                        setIsUserMenuOpen(false);
+                      }}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                    >
+                      <UserCog className="w-4 h-4 text-brand-500" />
+                      <span>Manajemen Pengguna</span>
+                    </button>
+                  )}
+
+                  <button
+                    onClick={() => {
+                      setActiveTab('settings');
+                      setIsUserMenuOpen(false);
+                    }}
+                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                  >
+                    <ShieldCheck className="w-4 h-4 text-sky-500" />
+                    <span>Pengaturan Sistem</span>
+                  </button>
+
+                  <div className="my-1 border-t border-slate-100 dark:border-slate-800" />
+
+                  {/* Logout button */}
+                  <button
+                    onClick={() => {
+                      setIsUserMenuOpen(false);
+                      logout();
+                    }}
+                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors"
+                  >
+                    <LogOut className="w-4 h-4 text-rose-500" />
+                    <span>Keluar (Logout)</span>
+                  </button>
+                </div>
+              )}
             </div>
-          </div>
+          )}
         </div>
       </div>
     </header>

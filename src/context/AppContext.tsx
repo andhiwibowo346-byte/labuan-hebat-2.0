@@ -27,10 +27,18 @@ import {
 } from '../data/mockData';
 
 interface AppContextType {
-  // User & RBAC
-  currentUser: UserProfile;
+  // User Authentication & Management
+  currentUser: UserProfile | null;
+  isAuthenticated: boolean;
+  usersList: UserProfile[];
+  login: (emailOrNip: string, password: string) => { success: boolean; message: string; user?: UserProfile };
+  loginAsUser: (user: UserProfile) => void;
+  logout: () => void;
+  createUser: (newUser: Omit<UserProfile, 'id' | 'created_at'>) => { success: boolean; message: string; user?: UserProfile };
+  updateUser: (id: string, updated: Partial<UserProfile>) => { success: boolean; message: string };
+  deleteUser: (id: string) => { success: boolean; message: string };
   switchUserRole: (role: UserRole) => void;
-  hasPermission: (action: 'manage_types' | 'manage_assets' | 'manage_maintenance' | 'delete_data' | 'export_data') => boolean;
+  hasPermission: (action: 'manage_types' | 'manage_assets' | 'manage_maintenance' | 'delete_data' | 'export_data' | 'manage_users') => boolean;
 
   // Navigation
   activeTab: string;
@@ -164,27 +172,141 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   }, [themeMode]);
 
-  // User & RBAC
-  const [currentUser, setCurrentUser] = useState<UserProfile>(() => {
-    const savedRole = localStorage.getItem('itam_user_role') as UserRole;
-    if (savedRole) {
-      const match = MOCK_USERS.find((u) => u.role === savedRole);
-      if (match) return match;
+  // Users list with LocalStorage persistence
+  const [usersList, setUsersList] = useState<UserProfile[]>(() => {
+    const saved = localStorage.getItem('itam_users_list');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        console.error('Failed to parse saved users list', e);
+      }
     }
+    return MOCK_USERS;
+  });
+
+  // Current logged in user
+  const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => {
+    const savedAuth = localStorage.getItem('itam_auth_user');
+    if (savedAuth) {
+      try {
+        return JSON.parse(savedAuth);
+      } catch (e) {
+        console.error('Failed to parse auth user', e);
+      }
+    }
+    // Default logged in user (Super Admin)
     return CURRENT_USER;
   });
 
+  const isAuthenticated = Boolean(currentUser);
+  const currentUserName = currentUser?.name || 'Administrator';
+
+  const login = (emailOrNip: string, password: string): { success: boolean; message: string; user?: UserProfile } => {
+    const cleanId = emailOrNip.trim().toLowerCase();
+    const match = usersList.find(
+      (u) =>
+        (u.email.toLowerCase() === cleanId || (u.nip && u.nip.toLowerCase() === cleanId)) &&
+        ((u.password && u.password === password) || (!u.password && password === 'admin123'))
+    );
+
+    if (!match) {
+      return { success: false, message: 'Email/NIP atau kata sandi tidak cocok.' };
+    }
+
+    if (match.status === 'inactive') {
+      return { success: false, message: 'Akun ini dinonaktifkan. Silakan hubungi Administrator.' };
+    }
+
+    setCurrentUser(match);
+    localStorage.setItem('itam_auth_user', JSON.stringify(match));
+    localStorage.setItem('itam_user_role', match.role);
+    return { success: true, message: `Selamat datang kembali, ${match.name}!`, user: match };
+  };
+
+  const loginAsUser = (user: UserProfile) => {
+    setCurrentUser(user);
+    localStorage.setItem('itam_auth_user', JSON.stringify(user));
+    localStorage.setItem('itam_user_role', user.role);
+  };
+
+  const logout = () => {
+    setCurrentUser(null);
+    localStorage.removeItem('itam_auth_user');
+    localStorage.removeItem('itam_user_role');
+  };
+
+  const createUser = (newUser: Omit<UserProfile, 'id' | 'created_at'>): { success: boolean; message: string; user?: UserProfile } => {
+    const emailExists = usersList.some(
+      (u) => u.email.trim().toLowerCase() === newUser.email.trim().toLowerCase()
+    );
+    if (emailExists) {
+      return { success: false, message: 'Email sudah terdaftar pada pengguna lain.' };
+    }
+
+    if (newUser.nip) {
+      const nipExists = usersList.some((u) => u.nip && u.nip.trim() === newUser.nip?.trim());
+      if (nipExists) {
+        return { success: false, message: 'NIP sudah terdaftar pada pengguna lain.' };
+      }
+    }
+
+    const created: UserProfile = {
+      ...newUser,
+      id: `usr-${Date.now().toString().slice(-4)}`,
+      status: newUser.status || 'active',
+      password: newUser.password || 'admin123',
+      avatar:
+        newUser.avatar ||
+        `https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80`,
+      created_at: new Date().toISOString(),
+    };
+
+    const nextList = [created, ...usersList];
+    setUsersList(nextList);
+    localStorage.setItem('itam_users_list', JSON.stringify(nextList));
+    return { success: true, message: `Pengguna ${created.name} berhasil ditambahkan!`, user: created };
+  };
+
+  const updateUser = (id: string, updated: Partial<UserProfile>): { success: boolean; message: string } => {
+    const nextList = usersList.map((u) => (u.id === id ? { ...u, ...updated } : u));
+    setUsersList(nextList);
+    localStorage.setItem('itam_users_list', JSON.stringify(nextList));
+
+    if (currentUser?.id === id) {
+      const updatedCurrent = { ...currentUser, ...updated };
+      setCurrentUser(updatedCurrent);
+      localStorage.setItem('itam_auth_user', JSON.stringify(updatedCurrent));
+    }
+
+    return { success: true, message: 'Data pengguna berhasil diperbarui.' };
+  };
+
+  const deleteUser = (id: string): { success: boolean; message: string } => {
+    if (currentUser?.id === id) {
+      return { success: false, message: 'Tidak dapat menghapus akun yang sedang Anda gunakan saat ini.' };
+    }
+    const nextList = usersList.filter((u) => u.id !== id);
+    setUsersList(nextList);
+    localStorage.setItem('itam_users_list', JSON.stringify(nextList));
+    return { success: true, message: 'Pengguna berhasil dihapus.' };
+  };
+
   const switchUserRole = (role: UserRole) => {
-    const match = MOCK_USERS.find((u) => u.role === role) || {
-      ...CURRENT_USER,
+    const match = usersList.find((u) => u.role === role) || {
+      ...(currentUser || CURRENT_USER),
       role,
       name: role === 'super_admin' ? 'Super Admin' : role === 'it_admin' ? 'Admin IT' : role === 'technician' ? 'Rizki Teknisi' : 'Siti Viewer',
     };
     setCurrentUser(match);
+    localStorage.setItem('itam_auth_user', JSON.stringify(match));
     localStorage.setItem('itam_user_role', role);
   };
 
-  const hasPermission = (action: 'manage_types' | 'manage_assets' | 'manage_maintenance' | 'delete_data' | 'export_data'): boolean => {
+  const hasPermission = (
+    action: 'manage_types' | 'manage_assets' | 'manage_maintenance' | 'delete_data' | 'export_data' | 'manage_users'
+  ): boolean => {
+    if (!currentUser) return false;
     const role = currentUser.role;
     if (role === 'super_admin') return true;
     if (role === 'it_admin') {
@@ -384,7 +506,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const historyEntry: AssetHistory = {
       id: `his-${Date.now()}`,
       asset_id: id,
-      user_name: currentUser.name,
+      user_name: currentUserName,
       action: 'create',
       remarks: `Aset baru ${created.asset_tag} (${created.name}) berhasil didaftarkan`,
       created_at: now,
@@ -423,7 +545,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       changes.push({
         id: `his-${Date.now()}-status`,
         asset_id: id,
-        user_name: currentUser.name,
+        user_name: currentUserName,
         action: 'status_change',
         field_changed: 'Status',
         old_value: oldAsset.status,
@@ -441,12 +563,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           changes.push({
             id: `his-${Date.now()}-${key}`,
             asset_id: id,
-            user_name: currentUser.name,
+            user_name: currentUserName,
             action: 'update',
             field_changed: key,
             old_value: String(oldVal ?? '-'),
             new_value: String(newVal ?? '-'),
-            remarks: remarks || `${currentUser.name} memperbarui data ${key}`,
+            remarks: remarks || `${currentUserName} memperbarui data ${key}`,
             created_at: now,
           });
         }
@@ -457,7 +579,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       changes.push({
         id: `his-${Date.now()}-loc`,
         asset_id: id,
-        user_name: currentUser.name,
+        user_name: currentUserName,
         action: 'update',
         field_changed: 'Lokasi',
         remarks: 'Pemindahan lokasi aset',
@@ -469,7 +591,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       changes.push({
         id: `his-${Date.now()}-emp`,
         asset_id: id,
-        user_name: currentUser.name,
+        user_name: currentUserName,
         action: 'assign',
         field_changed: 'Penugasan Pengguna',
         remarks: 'Penugasan / handover aset ke pengguna lain',
@@ -518,11 +640,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       {
         id: `his-${Date.now()}`,
         asset_id: assetId,
-        user_name: currentUser.name,
+        user_name: currentUserName,
         action: 'upload_photo',
         field_changed: 'Foto Aset',
         new_value: photo.caption,
-        remarks: `${currentUser.name} mengunggah foto ${photo.caption}`,
+        remarks: `${currentUserName} mengunggah foto ${photo.caption}`,
         created_at: now,
       },
       ...prev,
@@ -577,11 +699,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       {
         id: `his-${Date.now()}`,
         asset_id: assetId,
-        user_name: currentUser.name,
+        user_name: currentUserName,
         action: 'upload_document',
         field_changed: 'Dokumen',
         new_value: doc.title,
-        remarks: `${currentUser.name} mengunggah dokumen ${doc.title}`,
+        remarks: `${currentUserName} mengunggah dokumen ${doc.title}`,
         created_at: now,
       },
       ...prev,
@@ -795,7 +917,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const newTut: TutorialItem = {
       ...tutorial,
       id: `tut-${Date.now()}`,
-      created_by: currentUser.name,
+      created_by: currentUserName,
       created_at: new Date().toISOString(),
     };
     setTutorials((prev) => [newTut, ...prev]);
@@ -886,6 +1008,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     <AppContext.Provider
       value={{
         currentUser,
+        isAuthenticated,
+        usersList,
+        login,
+        loginAsUser,
+        logout,
+        createUser,
+        updateUser,
+        deleteUser,
         switchUserRole,
         hasPermission,
         activeTab,

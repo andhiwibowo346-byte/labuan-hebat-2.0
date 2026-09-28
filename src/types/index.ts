@@ -10,6 +10,9 @@ export interface UserProfile {
   avatar?: string;
   nip?: string;
   department?: string;
+  password?: string;
+  created_at?: string;
+  status?: 'active' | 'inactive';
 }
 
 export type CustomFieldType =

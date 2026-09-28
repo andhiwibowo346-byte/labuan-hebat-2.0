@@ -16,6 +16,8 @@ import {
   Sun,
   Moon,
   Laptop,
+  UserCog,
+  LogOut,
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 
@@ -34,6 +36,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     employees,
     maintenanceRecords,
     notifications,
+    usersList,
+    currentUser,
+    logout,
+    hasPermission,
     isDarkMode,
     themeMode,
     setThemeMode,
@@ -48,7 +54,18 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     { id: 'tutorial', label: 'Tutorial & SOP IT', icon: GraduationCap, badge: 'Baru', badgeColor: 'bg-emerald-500 text-white' },
     { id: 'asset_types', label: 'Jenis Asset', icon: Layers, badge: assetTypes.length },
     { id: 'locations', label: 'Lokasi', icon: MapPin, badge: locations.length },
-    { id: 'employees', label: 'Pengguna', icon: Users, badge: employees.length },
+    { id: 'employees', label: 'Karyawan / Aset', icon: Users, badge: employees.length },
+    ...(hasPermission('manage_users')
+      ? [
+          {
+            id: 'user_management',
+            label: 'Kelola User',
+            icon: UserCog,
+            badge: usersList.length,
+            badgeColor: 'bg-indigo-600 text-white',
+          },
+        ]
+      : []),
     { id: 'maintenance', label: 'Maintenance', icon: Wrench, badge: activeMaintenanceCount > 0 ? activeMaintenanceCount : undefined, badgeColor: 'bg-amber-500 text-white' },
     { id: 'reports', label: 'Laporan & Export', icon: FileSpreadsheet },
     { id: 'statistics', label: 'Statistik', icon: BarChart3 },
@@ -204,11 +221,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
 
         {/* Database Status Card */}
         <div className="p-3 border-t border-slate-200 dark:border-slate-800">
-          <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-950/70 border border-slate-200/60 dark:border-slate-800">
-            <div className="flex items-center justify-between mb-1.5">
+          <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-950/70 border border-slate-200/60 dark:border-slate-800">
+            <div className="flex items-center justify-between mb-1">
               <div className="flex items-center gap-2">
                 <Database className="w-3.5 h-3.5 text-brand-500" />
-                <span className="text-xs font-semibold text-slate-800 dark:text-slate-200">
+                <span className="text-[11px] font-semibold text-slate-800 dark:text-slate-200">
                   Supabase Engine
                 </span>
               </div>
@@ -217,11 +234,42 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
               </span>
             </div>
-            <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-tight">
+            <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-tight">
               PostgreSQL Hybrid Cache Active
             </p>
           </div>
         </div>
+
+        {/* User Card & Logout Button */}
+        {currentUser && (
+          <div className="px-3 pb-3">
+            <div className="flex items-center justify-between p-2 rounded-xl bg-slate-100/80 dark:bg-slate-950/80 border border-slate-200/60 dark:border-slate-800">
+              <div className="flex items-center gap-2 min-w-0">
+                <img
+                  src={currentUser.avatar}
+                  alt={currentUser.name}
+                  className="w-8 h-8 rounded-lg object-cover ring-1 ring-slate-300 dark:ring-slate-700 shrink-0"
+                />
+                <div className="min-w-0">
+                  <p className="text-xs font-bold text-slate-900 dark:text-white truncate leading-none">
+                    {currentUser.name}
+                  </p>
+                  <p className="text-[10px] text-brand-600 dark:text-brand-400 font-medium capitalize mt-0.5 truncate">
+                    {currentUser.role.replace('_', ' ')}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={logout}
+                title="Keluar (Logout)"
+                className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/50 transition-colors shrink-0"
+              >
+                <LogOut className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        )}
       </aside>
     </>
   );

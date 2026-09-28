@@ -20,10 +20,17 @@ import { QuickExcelImportModal } from './components/assets/QuickExcelImportModal
 import { QRScannerModal } from './components/qr/QRScannerModal';
 import { PrintLabelsModal } from './components/qr/PrintLabelsModal';
 import { MobileBottomNav } from './components/layout/MobileBottomNav';
+import { LoginView } from './components/auth/LoginView';
+import { UserManagerView } from './components/users/UserManagerView';
 import { Asset } from './types';
 
 const MainAppContent: React.FC = () => {
-  const { activeTab, selectedAssetId, setSelectedAssetId } = useApp();
+  const { activeTab, selectedAssetId, setSelectedAssetId, isAuthenticated, currentUser } = useApp();
+
+  // If not logged in, render the login page
+  if (!isAuthenticated || !currentUser) {
+    return <LoginView />;
+  }
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isGlobalSearchOpen, setIsGlobalSearchOpen] = useState(false);
@@ -90,6 +97,7 @@ const MainAppContent: React.FC = () => {
           {activeTab === 'maintenance' && <MaintenanceView />}
           {activeTab === 'reports' && <ReportsExportView />}
           {activeTab === 'statistics' && <StatisticsView />}
+          {activeTab === 'user_management' && <UserManagerView />}
           {activeTab === 'notifications' && <NotificationsView />}
           {activeTab === 'settings' && <SettingsView />}
         </main>
