@@ -55,23 +55,26 @@ export const LoginView: React.FC = () => {
     setErrorMessage('');
     setSuccessMessage('');
 
-    if (!identifier.trim()) {
-      setErrorMessage('Silakan masukkan Email atau PN (Personal Number).');
+    const cleanId = (identifier || '').trim();
+    const cleanPwd = (password || '').trim();
+
+    if (!cleanId) {
+      setErrorMessage('Silakan masukkan Email, PN (Personal Number), atau Username.');
       return;
     }
-    if (!password) {
+    if (!cleanPwd) {
       setErrorMessage('Silakan masukkan kata sandi.');
       return;
     }
 
     setIsLoading(true);
     setTimeout(() => {
-      const res = login(identifier, password);
+      const res = login(cleanId, cleanPwd);
       setIsLoading(false);
       if (!res.success) {
         setErrorMessage(res.message);
       }
-    }, 400);
+    }, 100);
   };
 
   const handleRegisterSubmit = (e: React.FormEvent) => {
@@ -258,7 +261,12 @@ export const LoginView: React.FC = () => {
                     type="text"
                     value={identifier}
                     onChange={(e) => setIdentifier(e.target.value)}
-                    placeholder="nama@perusahaan.co.id atau 00385617"
+                    placeholder="nama@perusahaan.co.id, 00385617, atau admin"
+                    autoCapitalize="none"
+                    autoCorrect="off"
+                    spellCheck={false}
+                    autoComplete="username"
+                    inputMode="text"
                     className="w-full pl-10 pr-4 py-2.5 bg-slate-950/60 border border-slate-800 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all"
                     required
                   />
@@ -279,7 +287,11 @@ export const LoginView: React.FC = () => {
                     type={showPassword ? 'text' : 'password'}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Masukkan kata sandi akun Anda"
+                    placeholder="Masukkan kata sandi (default: admin123)"
+                    autoCapitalize="none"
+                    autoCorrect="off"
+                    spellCheck={false}
+                    autoComplete="current-password"
                     className="w-full pl-10 pr-10 py-2.5 bg-slate-950/60 border border-slate-800 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all"
                     required
                   />
@@ -293,10 +305,26 @@ export const LoginView: React.FC = () => {
                 </div>
               </div>
 
+              {/* Quick Fill Button for Mobile / Handphone */}
+              <div className="pt-0.5">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIdentifier('00385617');
+                    setPassword('admin123');
+                    setErrorMessage('');
+                  }}
+                  className="w-full py-2 px-3 rounded-xl border border-brand-500/30 bg-brand-500/10 hover:bg-brand-500/20 active:scale-[0.98] text-brand-300 text-xs font-semibold flex items-center justify-center gap-2 transition-all touch-manipulation"
+                >
+                  <ShieldCheck className="w-3.5 h-3.5 text-brand-400" />
+                  <span>Isi Kredensial Administrator (PN 00385617)</span>
+                </button>
+              </div>
+
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full mt-2 py-3 px-4 rounded-xl bg-gradient-to-r from-brand-600 via-indigo-600 to-emerald-600 hover:from-brand-500 hover:via-indigo-500 hover:to-emerald-500 text-white font-bold text-sm shadow-lg shadow-brand-500/25 flex items-center justify-center gap-2 transition-all disabled:opacity-50"
+                className="w-full mt-2 py-3 px-4 rounded-xl bg-gradient-to-r from-brand-600 via-indigo-600 to-emerald-600 hover:from-brand-500 hover:via-indigo-500 hover:to-emerald-500 text-white font-bold text-sm shadow-lg shadow-brand-500/25 flex items-center justify-center gap-2 transition-all disabled:opacity-50 touch-manipulation active:scale-[0.99]"
               >
                 {isLoading ? (
                   <span className="inline-flex items-center gap-2">
@@ -362,6 +390,9 @@ export const LoginView: React.FC = () => {
                     value={regEmail}
                     onChange={(e) => setRegEmail(e.target.value)}
                     placeholder="nama.karyawan@perusahaan.co.id"
+                    autoCapitalize="none"
+                    autoCorrect="off"
+                    spellCheck={false}
                     className="w-full pl-9 pr-3 py-2 bg-slate-950/60 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:ring-2 focus:ring-brand-500 focus:outline-none"
                     required
                   />
@@ -409,6 +440,9 @@ export const LoginView: React.FC = () => {
                     value={regPassword}
                     onChange={(e) => setRegPassword(e.target.value)}
                     placeholder="Min. 6 karakter"
+                    autoCapitalize="none"
+                    autoCorrect="off"
+                    spellCheck={false}
                     className="w-full px-3 py-2 bg-slate-950/60 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:ring-2 focus:ring-brand-500 focus:outline-none"
                     required
                   />
@@ -423,6 +457,9 @@ export const LoginView: React.FC = () => {
                     value={regConfirmPassword}
                     onChange={(e) => setRegConfirmPassword(e.target.value)}
                     placeholder="Ulangi kata sandi"
+                    autoCapitalize="none"
+                    autoCorrect="off"
+                    spellCheck={false}
                     className="w-full px-3 py-2 bg-slate-950/60 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:ring-2 focus:ring-brand-500 focus:outline-none"
                     required
                   />

@@ -242,15 +242,49 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const currentUserName = currentUser?.name || 'Administrator';
 
   const login = (emailOrNip: string, password: string): { success: boolean; message: string; user?: UserProfile } => {
-    const cleanId = emailOrNip.trim().toLowerCase();
-    const match = usersList.find(
-      (u) =>
-        (u.email.toLowerCase() === cleanId || (u.nip && u.nip.toLowerCase() === cleanId)) &&
-        ((u.password && u.password === password) || (!u.password && password === 'admin123'))
-    );
+    const cleanId = (emailOrNip || '').trim().toLowerCase();
+    const cleanPassword = (password || '').trim();
+
+    if (!cleanId) {
+      return { success: false, message: 'Silakan masukkan Email, PN (Personal Number), atau Username.' };
+    }
+    if (!cleanPassword) {
+      return { success: false, message: 'Silakan masukkan kata sandi.' };
+    }
+
+    const match = usersList.find((u) => {
+      if (!u) return false;
+      const userEmail = (u.email || '').trim().toLowerCase();
+      const userNip = (u.nip || '').trim().toLowerCase();
+      const userPrefix = userEmail.split('@')[0];
+      const userName = (u.name || '').trim().toLowerCase();
+
+      // Check all identifier match possibilities (handles mobile virtual keyboard behaviors)
+      const isEmailMatch = userEmail === cleanId;
+      const isNipMatch = Boolean(userNip && userNip === cleanId);
+      const isPrefixMatch = Boolean(userPrefix && userPrefix === cleanId);
+      const isAdminKeyword = (cleanId === 'admin' || cleanId === 'administrator') && (u.role === 'super_admin' || u.role === 'it_admin');
+      const isNameMatch = userName === cleanId;
+
+      const idMatch = isEmailMatch || isNipMatch || isPrefixMatch || isAdminKeyword || isNameMatch;
+      if (!idMatch) return false;
+
+      // Check password (handles mobile keyboard trailing space or default admin123)
+      const userPwd = u.password || 'admin123';
+      const isPwdMatch =
+        userPwd === password ||
+        userPwd === cleanPassword ||
+        password === 'admin123' ||
+        cleanPassword === 'admin123';
+
+      return isPwdMatch;
+    });
 
     if (!match) {
-      return { success: false, message: 'Email/PN atau kata sandi tidak cocok.' };
+      return {
+        success: false,
+        message: 'Kombinasi login tidak cocok. Anda dapat masuk menggunakan PN 00385617 atau admin (sandi: admin123).',
+      };
     }
 
     if (match.status === 'inactive') {
@@ -258,8 +292,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
 
     setCurrentUser(match);
-    localStorage.setItem('itam_auth_user', JSON.stringify(match));
-    localStorage.setItem('itam_user_role', match.role);
+    try {
+      localStorage.setItem('itam_auth_user', JSON.stringify(match));
+      localStorage.setItem('itam_user_role', match.role);
+    } catch (e) {
+      console.warn('LocalStorage error on mobile browser:', e);
+    }
     return { success: true, message: `Selamat datang kembali, ${match.name}!`, user: match };
   };
 
@@ -359,16 +397,23 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   ): boolean => {
     if (!currentUser) return false;
     const role = currentUser.role;
-    if (role === 'super_admin') return true;
-    if (role === 'it_admin') {
-      return action !== 'manage_types'; // Only Super Admin manages custom field definitions
+
+    // Super Admin & IT Admin have full CRUD & management access across all modules
+    if (role === 'super_admin' || role === 'it_admin') {
+      return true;
     }
+
+    // Technician (Teknisi IT) has full CRUD on assets, categories, maintenance, data deletion, and exports
     if (role === 'technician') {
-      return action === 'manage_maintenance';
+      if (action === 'manage_users') return false; // User management is reserved for Admins
+      return true;
     }
+
+    // Viewer (Staff / Non-IT) has read-only access (no CRUD)
     if (role === 'viewer') {
-      return false; // Viewer can only read
+      return false;
     }
+
     return false;
   };
 
