@@ -16,6 +16,7 @@ import {
   Moon,
   Laptop,
   Palette,
+  Trash2,
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import {
@@ -26,7 +27,16 @@ import {
 } from '../../services/supabaseClient';
 
 export const SettingsView: React.FC = () => {
-  const { resetAllDataToDefault, exportDatabaseJSON, importDatabaseJSON, themeMode, setThemeMode, isDarkMode } = useApp();
+  const {
+    assets,
+    clearAllAssets,
+    resetAllDataToDefault,
+    exportDatabaseJSON,
+    importDatabaseJSON,
+    themeMode,
+    setThemeMode,
+    isDarkMode,
+  } = useApp();
 
   const stored = getStoredSupabaseConfig();
   const [supabaseUrl, setSupabaseUrl] = useState(stored.url);
@@ -477,17 +487,17 @@ export const SettingsView: React.FC = () => {
       {/* Card 3: Database Backup & Restore & Demo Reset */}
       <div className="p-6 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm space-y-4">
         <h2 className="text-sm md:text-base font-bold text-slate-900 dark:text-white">
-          Cadangan Data (Backup) & Reset Data Demo
+          Cadangan Data (Backup) & Pengelolaan Data Aset
         </h2>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-2">
           {/* Download JSON Backup */}
           <div className="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 space-y-3">
             <span className="text-xs font-bold text-slate-800 dark:text-slate-200 block">
               Download JSON Backup
             </span>
             <p className="text-[11px] text-slate-400">
-              Simpan seluruh data aset, jenis, lokasi, dan pengguna ke dalam file backup terenkripsi
+              Simpan seluruh data aset, jenis, lokasi, dan pengguna ke dalam file backup
             </p>
             <button
               onClick={handleDownloadBackup}
@@ -504,7 +514,7 @@ export const SettingsView: React.FC = () => {
               Pulihkan dari Backup
             </span>
             <p className="text-[11px] text-slate-400">
-              Restore seluruh inventaris dari file backup JSON sebelumnya
+              Restore inventaris dari file backup JSON sebelumnya
             </p>
             <label className="w-full flex items-center justify-center gap-1.5 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-800 dark:text-slate-200 hover:bg-slate-50 shadow-sm cursor-pointer">
               <Upload className="w-3.5 h-3.5 text-emerald-500" />
@@ -513,22 +523,48 @@ export const SettingsView: React.FC = () => {
             </label>
           </div>
 
-          {/* Reset Demo Data */}
-          <div className="p-4 rounded-2xl border border-rose-500/20 bg-rose-500/5 space-y-3">
+          {/* Kosongkan Seluruh Data Aset */}
+          <div className="p-4 rounded-2xl border border-rose-500/25 bg-rose-500/5 space-y-3">
             <span className="text-xs font-bold text-rose-600 dark:text-rose-400 block">
+              Kosongkan Semua Aset
+            </span>
+            <p className="text-[11px] text-slate-400">
+              Hapus seluruh ({assets.length}) aset inventaris untuk mengosongkan data sistem
+            </p>
+            <button
+              onClick={() => {
+                if (assets.length === 0) {
+                  alert('Inventaris aset saat ini sudah kosong.');
+                  return;
+                }
+                if (confirm(`PERINGATAN: Apakah Anda yakin ingin menghapus seluruh (${assets.length}) data aset, foto, dan riwayat pemeliharaan secara permanen?`)) {
+                  clearAllAssets();
+                  alert('Seluruh data aset berhasil dikosongkan!');
+                }
+              }}
+              className="w-full flex items-center justify-center gap-1.5 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold shadow-sm transition-all"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              <span>Hapus Semua Aset ({assets.length})</span>
+            </button>
+          </div>
+
+          {/* Reset Demo Data */}
+          <div className="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 space-y-3">
+            <span className="text-xs font-bold text-slate-700 dark:text-slate-300 block">
               Reset Data ke Demo Awal
             </span>
             <p className="text-[11px] text-slate-400">
-              Kembalikan seluruh data ke sampel standar perbankan/korporasi
+              Muat ulang seluruh data aset ke sampel standar perbankan
             </p>
             <button
               onClick={() => {
                 if (confirm('Kembalikan seluruh data aset ke data demo awal?')) {
                   resetAllDataToDefault();
-                  alert('Data telah direset ke demo default!');
+                  alert('Data aset telah direset ke demo default!');
                 }
               }}
-              className="w-full flex items-center justify-center gap-1.5 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold shadow-sm"
+              className="w-full flex items-center justify-center gap-1.5 py-2 rounded-xl bg-slate-700 hover:bg-slate-600 text-white text-xs font-semibold shadow-sm"
             >
               <RefreshCw className="w-3.5 h-3.5" />
               <span>Reset Data Demo</span>

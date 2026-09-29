@@ -180,7 +180,8 @@ export type NotificationType =
   | 'doc_expiring'
   | 'missing_photo'
   | 'missing_location'
-  | 'new_asset';
+  | 'new_asset'
+  | 'asset_deleted';
 
 export interface AppNotification {
   id: string;

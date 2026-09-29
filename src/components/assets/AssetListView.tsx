@@ -52,6 +52,7 @@ export const AssetListView: React.FC<AssetListViewProps> = ({
     locations,
     employees,
     deleteAsset,
+    deleteAssets,
     setSelectedAssetId,
     openPrintLabels,
     hasPermission,
@@ -78,6 +79,7 @@ export const AssetListView: React.FC<AssetListViewProps> = ({
 
   // Delete Confirmation Modal state
   const [assetToDelete, setAssetToDelete] = useState<Asset | null>(null);
+  const [isBatchDeleteModalOpen, setIsBatchDeleteModalOpen] = useState(false);
 
   // View Mode: auto (cards on mobile, table on desktop), table, cards
   const [viewMode, setViewMode] = useState<'auto' | 'table' | 'cards'>('auto');
@@ -430,6 +432,17 @@ export const AssetListView: React.FC<AssetListViewProps> = ({
                 >
                   <Download className="w-3.5 h-3.5 text-emerald-500" />
                   <span>Export Terpilih</span>
+                </button>
+              )}
+
+              {hasPermission('delete_data') && (
+                <button
+                  onClick={() => setIsBatchDeleteModalOpen(true)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold shadow-sm transition-all"
+                  title="Hapus aset yang dipilih"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>Hapus Terpilih ({selectedIds.length})</span>
                 </button>
               )}
             </div>
@@ -904,6 +917,41 @@ export const AssetListView: React.FC<AssetListViewProps> = ({
                 className="px-4 py-2 rounded-xl text-xs md:text-sm font-semibold bg-rose-600 hover:bg-rose-500 text-white shadow-md shadow-rose-600/30"
               >
                 Hapus Permanen
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Batch Delete Confirmation Modal */}
+      {isBatchDeleteModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
+          <div className="w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-2xl border border-slate-200 dark:border-slate-800">
+            <div className="w-12 h-12 rounded-2xl bg-rose-500/10 text-rose-500 flex items-center justify-center mb-4">
+              <AlertCircle className="w-6 h-6" />
+            </div>
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+              Hapus {selectedIds.length} Aset Terpilih?
+            </h3>
+            <p className="text-xs md:text-sm text-slate-500 dark:text-slate-400 mt-2">
+              Apakah Anda yakin ingin menghapus <b>{selectedIds.length} aset</b> yang dipilih? Semua riwayat perbaikan, foto, dan dokumen aset ini akan dihapus secara permanen. Tindakan ini tidak dapat dibatalkan.
+            </p>
+            <div className="flex items-center justify-end gap-3 mt-6">
+              <button
+                onClick={() => setIsBatchDeleteModalOpen(false)}
+                className="px-4 py-2 rounded-xl text-xs md:text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+              >
+                Batal
+              </button>
+              <button
+                onClick={() => {
+                  deleteAssets(selectedIds);
+                  setSelectedIds([]);
+                  setIsBatchDeleteModalOpen(false);
+                }}
+                className="px-4 py-2 rounded-xl text-xs md:text-sm font-semibold bg-rose-600 hover:bg-rose-500 text-white shadow-md shadow-rose-600/30"
+              >
+                Hapus {selectedIds.length} Aset Permanen
               </button>
             </div>
           </div>

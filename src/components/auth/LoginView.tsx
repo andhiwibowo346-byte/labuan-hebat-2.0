@@ -8,7 +8,6 @@ import {
   EyeOff,
   ShieldCheck,
   Wrench,
-  Eye as EyeIcon,
   Sun,
   Moon,
   Laptop,
@@ -16,7 +15,6 @@ import {
   UserPlus,
   CheckCircle2,
   AlertCircle,
-  Sparkles,
   Building,
   KeyRound,
   IdCard,
@@ -27,7 +25,6 @@ import { UserRole, UserProfile } from '../../types';
 export const LoginView: React.FC = () => {
   const {
     login,
-    loginAsUser,
     createUser,
     usersList,
     isDarkMode,
@@ -35,7 +32,7 @@ export const LoginView: React.FC = () => {
     setThemeMode,
   } = useApp();
 
-  const [activeMode, setActiveMode] = useState<'login' | 'register' | 'demo'>('login');
+  const [activeMode, setActiveMode] = useState<'login' | 'register'>('login');
 
   // Login form state (empty by default)
   const [identifier, setIdentifier] = useState('');
@@ -122,32 +119,6 @@ export const LoginView: React.FC = () => {
     }, 400);
   };
 
-  const roleBadges: Record<UserRole, { label: string; icon: any; color: string; desc: string }> = {
-    super_admin: {
-      label: 'Super Admin',
-      icon: ShieldCheck,
-      color: 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/30',
-      desc: 'Akses penuh ke semua modul, kelola pengguna & skema field aset',
-    },
-    it_admin: {
-      label: 'Admin IT',
-      icon: ShieldCheck,
-      color: 'bg-sky-500/10 text-sky-600 dark:text-sky-400 border-sky-500/30',
-      desc: 'Kelola aset, lokasi, pengguna, maintenance, import & export',
-    },
-    technician: {
-      label: 'Teknisi IT',
-      icon: Wrench,
-      color: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30',
-      desc: 'Melihat aset, update tiket servis maintenance & upload foto bukti',
-    },
-    viewer: {
-      label: 'Viewer (Read-only)',
-      icon: EyeIcon,
-      color: 'bg-slate-500/10 text-slate-600 dark:text-slate-400 border-slate-500/30',
-      desc: 'Hanya dapat memantau data dan melihat dashboard',
-    },
-  };
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between relative overflow-hidden font-sans selection:bg-brand-500 selection:text-white">
@@ -225,7 +196,7 @@ export const LoginView: React.FC = () => {
           <div className="absolute -top-px left-10 right-10 h-px bg-gradient-to-r from-transparent via-brand-500 to-transparent" />
 
           {/* Mode Switcher Tabs */}
-          <div className="grid grid-cols-3 gap-1.5 p-1.5 bg-slate-950/80 rounded-2xl border border-slate-800/80 mb-6">
+          <div className="grid grid-cols-2 gap-1.5 p-1.5 bg-slate-950/80 rounded-2xl border border-slate-800/80 mb-6">
             <button
               type="button"
               onClick={() => {
@@ -255,21 +226,6 @@ export const LoginView: React.FC = () => {
             >
               <UserPlus className="w-3.5 h-3.5" />
               <span>Buat Akun</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setActiveMode('demo');
-                setErrorMessage('');
-              }}
-              className={`py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
-                activeMode === 'demo'
-                  ? 'bg-brand-600 text-white shadow-md shadow-brand-600/30'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-              <span>Akses Demo</span>
             </button>
           </div>
 
@@ -488,51 +444,6 @@ export const LoginView: React.FC = () => {
             </form>
           )}
 
-          {/* MODE 3: QUICK 1-CLICK DEMO ACCESS */}
-          {activeMode === 'demo' && (
-            <div className="space-y-3">
-              <p className="text-xs text-slate-400 mb-2">
-                Pilih profil peran di bawah ini untuk langsung masuk tanpa perlu mengetik kata sandi:
-              </p>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                {usersList.slice(0, 4).map((user) => {
-                  const badge = roleBadges[user.role];
-                  const Icon = badge.icon;
-                  return (
-                    <button
-                      key={user.id}
-                      type="button"
-                      onClick={() => loginAsUser(user)}
-                      className="p-3 rounded-2xl bg-slate-950/70 border border-slate-800 hover:border-brand-500/50 hover:bg-slate-800/60 transition-all text-left group flex items-start gap-3"
-                    >
-                      <img
-                        src={user.avatar}
-                        alt={user.name}
-                        className="w-10 h-10 rounded-xl object-cover ring-2 ring-slate-700 group-hover:ring-brand-500 transition-all shrink-0"
-                      />
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center justify-between">
-                          <p className="text-xs font-bold text-white group-hover:text-brand-400 transition-colors truncate">
-                            {user.name}
-                          </p>
-                          <Icon className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                        </div>
-                        <span
-                          className={`inline-block px-1.5 py-0.5 mt-0.5 rounded text-[10px] font-semibold border ${badge.color}`}
-                        >
-                          {badge.label}
-                        </span>
-                        <p className="text-[10px] text-slate-400 mt-1 line-clamp-1">
-                          {user.email}
-                        </p>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          )}
         </div>
       </main>
 

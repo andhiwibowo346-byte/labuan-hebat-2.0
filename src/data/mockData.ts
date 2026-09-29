@@ -25,42 +25,6 @@ export const CURRENT_USER: UserProfile = {
 
 export const MOCK_USERS: UserProfile[] = [
   CURRENT_USER,
-  {
-    id: 'usr-002',
-    name: 'Budi Santoso',
-    email: 'budi.santoso@perusahaan.co.id',
-    role: 'it_admin',
-    nip: '00385610',
-    department: 'IT Infrastructure',
-    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
-    password: 'admin123',
-    status: 'active',
-    created_at: '2026-02-01T09:30:00Z',
-  },
-  {
-    id: 'usr-003',
-    name: 'Rizki Pratama',
-    email: 'rizki.teknisi@perusahaan.co.id',
-    role: 'technician',
-    nip: '00385615',
-    department: 'Hardware Maintenance',
-    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80',
-    password: 'admin123',
-    status: 'active',
-    created_at: '2026-02-15T10:15:00Z',
-  },
-  {
-    id: 'usr-004',
-    name: 'Siti Rahmawati',
-    email: 'siti.viewer@perusahaan.co.id',
-    role: 'viewer',
-    nip: '00385620',
-    department: 'Audit & Compliance',
-    avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80',
-    password: 'admin123',
-    status: 'active',
-    created_at: '2026-03-01T11:00:00Z',
-  },
 ];
 
 export const INITIAL_ASSET_TYPES: AssetType[] = [

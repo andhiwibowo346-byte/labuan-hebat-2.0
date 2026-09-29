@@ -7,6 +7,7 @@ import {
   MaintenanceRecord,
   AssetHistory,
   AppNotification,
+  NotificationType,
   UserProfile,
   UserRole,
   AssetFieldDefinition,
@@ -67,6 +68,8 @@ interface AppContextType {
   addAsset: (asset: Omit<Asset, 'id' | 'created_at' | 'updated_at' | 'photos' | 'documents'>, initialPhotos?: any[], initialDocs?: any[]) => Asset;
   updateAsset: (id: string, updatedData: Partial<Asset>, remarks?: string) => void;
   deleteAsset: (id: string) => void;
+  deleteAssets: (ids: string[]) => void;
+  clearAllAssets: () => void;
   addAssetPhoto: (assetId: string, photo: { url: string; caption: string }) => void;
   deleteAssetPhoto: (assetId: string, photoId: string) => void;
   addAssetDocument: (assetId: string, doc: { title: string; file_name: string; file_type: 'pdf' | 'excel' | 'word' | 'txt' | 'other'; url: string; file_size?: string }) => void;
@@ -172,12 +175,23 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   }, [themeMode]);
 
-  // Reset initial cache to ensure clean start (no auto-login, clean history)
-  if (typeof window !== 'undefined' && localStorage.getItem('itam_v2_init') !== 'clean_v2') {
+  // Reset initial cache to ensure clean start (no auto-login, clean history, remove demo accounts)
+  if (typeof window !== 'undefined' && localStorage.getItem('itam_v4_clean_demo') !== 'clean_v4') {
     localStorage.removeItem('itam_auth_user');
     localStorage.removeItem('itam_user_role');
-    localStorage.removeItem('itam_asset_history');
-    localStorage.setItem('itam_v2_init', 'clean_v2');
+    const saved = localStorage.getItem('itam_users_list');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          const cleaned = parsed.filter((u: UserProfile) => !['usr-002', 'usr-003', 'usr-004'].includes(u.id));
+          localStorage.setItem('itam_users_list', JSON.stringify(cleaned.length > 0 ? cleaned : MOCK_USERS));
+        }
+      } catch {
+        localStorage.removeItem('itam_users_list');
+      }
+    }
+    localStorage.setItem('itam_v4_clean_demo', 'clean_v4');
   }
 
   // Users list with LocalStorage persistence
@@ -185,7 +199,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const saved = localStorage.getItem('itam_users_list');
     if (saved) {
       try {
-        return JSON.parse(saved);
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const cleaned = parsed.filter((u: UserProfile) => !['usr-002', 'usr-003', 'usr-004'].includes(u.id));
+          return cleaned.length > 0 ? cleaned : MOCK_USERS;
+        }
       } catch (e) {
         console.error('Failed to parse saved users list', e);
       }
@@ -612,11 +630,71 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
+  const pushNotification = (notif: {
+    type: NotificationType;
+    title: string;
+    message: string;
+    asset_id?: string;
+    severity?: 'info' | 'warning' | 'error' | 'success';
+  }) => {
+    const newNotif: AppNotification = {
+      id: `notif-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+      type: notif.type,
+      title: notif.title,
+      message: notif.message,
+      asset_id: notif.asset_id,
+      created_at: new Date().toISOString(),
+      read: false,
+      severity: notif.severity || 'info',
+    };
+    setNotifications((prev) => [newNotif, ...prev]);
+  };
+
   const deleteAsset = (id: string) => {
+    const target = assets.find((a) => a.id === id);
     setAssets((prev) => prev.filter((a) => a.id !== id));
     setMaintenanceRecords((prev) => prev.filter((m) => m.asset_id !== id));
     setAssetHistory((prev) => prev.filter((h) => h.asset_id !== id));
     if (selectedAssetId === id) setSelectedAssetId(null);
+    if (target) {
+      pushNotification({
+        type: 'asset_deleted',
+        title: 'Aset Dihapus',
+        message: `Aset ${target.name} (${target.asset_tag}) telah berhasil dihapus.`,
+        severity: 'warning',
+      });
+    }
+  };
+
+  const deleteAssets = (ids: string[]) => {
+    if (!ids || ids.length === 0) return;
+    const targetSet = new Set(ids);
+    setAssets((prev) => prev.filter((a) => !targetSet.has(a.id)));
+    setMaintenanceRecords((prev) => prev.filter((m) => !targetSet.has(m.asset_id)));
+    setAssetHistory((prev) => prev.filter((h) => !targetSet.has(h.asset_id)));
+    if (selectedAssetId && targetSet.has(selectedAssetId)) {
+      setSelectedAssetId(null);
+    }
+    pushNotification({
+      type: 'asset_deleted',
+      title: 'Hapus Massal Berhasil',
+      message: `${ids.length} aset terpilih telah berhasil dihapus secara permanen.`,
+      severity: 'warning',
+    });
+  };
+
+  const clearAllAssets = () => {
+    const count = assets.length;
+    setAssets([]);
+    setMaintenanceRecords([]);
+    setAssetHistory([]);
+    setSelectedAssetId(null);
+    pushNotification({
+      type: 'asset_deleted',
+      title: 'Inventaris Aset Dikosongkan',
+      message: `Seluruh ${count} data aset dan riwayat terkait telah berhasil dikosongkan.`,
+      severity: 'warning',
+    });
   };
 
   const addAssetPhoto = (assetId: string, photo: { url: string; caption: string }) => {
@@ -1046,6 +1124,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         addAsset,
         updateAsset,
         deleteAsset,
+        deleteAssets,
+        clearAllAssets,
         addAssetPhoto,
         deleteAssetPhoto,
         addAssetDocument,
