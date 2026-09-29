@@ -225,6 +225,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
           const cleaned = parsed.filter((u: UserProfile) => !['usr-002', 'usr-003', 'usr-004'].includes(u.id));
+          const hasBrilink = cleaned.some((u: UserProfile) => u.role === 'petugas_brilink');
+          if (!hasBrilink) {
+            const brilinkUser = MOCK_USERS.find((u) => u.role === 'petugas_brilink');
+            if (brilinkUser) cleaned.push(brilinkUser);
+          }
           return cleaned.length > 0 ? cleaned : MOCK_USERS;
         }
       } catch (e) {
@@ -301,6 +306,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
 
     setCurrentUser(match);
+    if (match.role === 'petugas_brilink') {
+      setActiveTab('edc_brilink');
+    }
     try {
       localStorage.setItem('itam_auth_user', JSON.stringify(match));
       localStorage.setItem('itam_user_role', match.role);
@@ -312,6 +320,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const loginAsUser = (user: UserProfile) => {
     setCurrentUser(user);
+    if (user.role === 'petugas_brilink') {
+      setActiveTab('edc_brilink');
+    }
     localStorage.setItem('itam_auth_user', JSON.stringify(user));
     localStorage.setItem('itam_user_role', user.role);
   };
@@ -334,7 +345,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (newUser.role === 'super_admin') {
       return {
         success: false,
-        message: 'Role Super Admin tidak diizinkan untuk akun baru yang didaftarkan. Silakan pilih Admin IT, Teknisi, atau Viewer.',
+        message: 'Role Super Admin tidak diizinkan untuk akun baru yang didaftarkan. Silakan pilih Admin IT, Teknisi, Petugas BRILink, atau Viewer.',
       };
     }
 
@@ -394,9 +405,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const match = usersList.find((u) => u.role === role) || {
       ...(currentUser || CURRENT_USER),
       role,
-      name: role === 'super_admin' ? 'Super Admin' : role === 'it_admin' ? 'Admin IT' : role === 'technician' ? 'Rizki Teknisi' : 'Siti Viewer',
+      name:
+        role === 'super_admin'
+          ? 'Super Admin'
+          : role === 'it_admin'
+          ? 'Admin IT'
+          : role === 'technician'
+          ? 'Rizki Teknisi'
+          : role === 'petugas_brilink'
+          ? 'Deni Petugas BRILink'
+          : 'Siti Viewer',
     };
     setCurrentUser(match);
+    if (role === 'petugas_brilink') {
+      setActiveTab('edc_brilink');
+    }
     localStorage.setItem('itam_auth_user', JSON.stringify(match));
     localStorage.setItem('itam_user_role', role);
   };
@@ -416,6 +439,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (role === 'technician') {
       if (action === 'manage_users') return false; // User management is reserved for Admins
       return true;
+    }
+
+    // Petugas Agen BRILink hanya fokus ke BRILink (izin hapus & export data BRILink)
+    if (role === 'petugas_brilink') {
+      if (action === 'delete_data' || action === 'export_data') return true;
+      return false;
     }
 
     // Viewer (Staff / Non-IT) has read-only access (no CRUD)

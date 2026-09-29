@@ -18,6 +18,7 @@ import {
   Lock,
   User,
   ShieldAlert,
+  Smartphone,
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { UserProfile, UserRole } from '../../types';
@@ -195,6 +196,11 @@ export const UserManagerView: React.FC = () => {
       icon: Wrench,
       badgeClass: 'bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-500/30',
     },
+    petugas_brilink: {
+      label: 'Petugas BRILink',
+      icon: Smartphone,
+      badgeClass: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/30',
+    },
     viewer: {
       label: 'Viewer',
       icon: Eye,
@@ -265,7 +271,7 @@ export const UserManagerView: React.FC = () => {
       )}
 
       {/* Stat Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
         <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-slate-400">Total Pengguna</span>
@@ -305,6 +311,16 @@ export const UserManagerView: React.FC = () => {
             {usersList.filter((u) => u.role === 'technician').length}
           </p>
         </div>
+
+        <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm col-span-2 sm:col-span-1">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-slate-400">Petugas BRILink</span>
+            <Smartphone className="w-4 h-4 text-emerald-500" />
+          </div>
+          <p className="text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-1">
+            {usersList.filter((u) => u.role === 'petugas_brilink').length}
+          </p>
+        </div>
       </div>
 
       {/* Filter and Search Bar */}
@@ -322,7 +338,7 @@ export const UserManagerView: React.FC = () => {
 
         {/* Role Filter Tabs */}
         <div className="flex items-center gap-1 overflow-x-auto pb-1 sm:pb-0">
-          {(['all', 'super_admin', 'it_admin', 'technician', 'viewer'] as const).map((r) => (
+          {(['all', 'super_admin', 'it_admin', 'technician', 'petugas_brilink', 'viewer'] as const).map((r) => (
             <button
               key={r}
               onClick={() => setRoleFilter(r)}
@@ -332,7 +348,7 @@ export const UserManagerView: React.FC = () => {
                   : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
               }`}
             >
-              {r === 'all' ? 'Semua Peran' : r.replace('_', ' ')}
+              {r === 'all' ? 'Semua Peran' : r === 'petugas_brilink' ? 'Petugas BRILink' : r.replace('_', ' ')}
             </button>
           ))}
         </div>
@@ -551,6 +567,7 @@ export const UserManagerView: React.FC = () => {
                   >
                     <option value="it_admin">Admin IT (Kelola Aset & Data)</option>
                     <option value="technician">Teknisi IT (Maintenance & Servis)</option>
+                    <option value="petugas_brilink">Petugas Agen BRILink (Fokus EDC BRILink)</option>
                     <option value="viewer">Viewer (Read-only)</option>
                   </select>
                 </div>
@@ -683,6 +700,7 @@ export const UserManagerView: React.FC = () => {
                     <option value="super_admin">Super Admin</option>
                     <option value="it_admin">Admin IT</option>
                     <option value="technician">Teknisi IT</option>
+                    <option value="petugas_brilink">Petugas Agen BRILink</option>
                     <option value="viewer">Viewer</option>
                   </select>
                 </div>

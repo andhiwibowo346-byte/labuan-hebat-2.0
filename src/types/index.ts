@@ -1,6 +1,6 @@
 export type ThemeMode = 'light' | 'dark' | 'system';
 
-export type UserRole = 'super_admin' | 'it_admin' | 'technician' | 'viewer';
+export type UserRole = 'super_admin' | 'it_admin' | 'technician' | 'viewer' | 'petugas_brilink';
 
 export interface UserProfile {
   id: string;

@@ -27,6 +27,18 @@ export const CURRENT_USER: UserProfile = {
 
 export const MOCK_USERS: UserProfile[] = [
   CURRENT_USER,
+  {
+    id: 'usr-brilink-01',
+    name: 'Deni Petugas BRILink',
+    email: 'brilink@labuanhebat.id',
+    role: 'petugas_brilink',
+    nip: '00385699',
+    department: 'Operasional Agen BRILink',
+    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
+    password: 'admin123',
+    status: 'active',
+    created_at: '2026-02-01T08:00:00Z',
+  },
 ];
 
 export const INITIAL_ASSET_TYPES: AssetType[] = [

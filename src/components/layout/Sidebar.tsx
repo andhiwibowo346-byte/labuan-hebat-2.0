@@ -52,37 +52,63 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
   const unreadNotifCount = notifications.filter((n) => !n.read).length;
   const activeEDCSubmissions = edcSubmissions.filter((s) => !['terpasang_aktif', 'ditolak'].includes(s.status)).length;
 
-  const navItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'assets', label: 'Asset', icon: Box, badge: assets.length },
-    {
-      id: 'edc_brilink',
-      label: 'EDC BRILink',
-      icon: Smartphone,
-      badge: activeEDCSubmissions > 0 ? `${activeEDCSubmissions} Proses` : `${edcMovements.length}`,
-      badgeColor: activeEDCSubmissions > 0 ? 'bg-amber-500 text-white' : 'bg-sky-600 text-white',
-    },
-    { id: 'tutorial', label: 'Tutorial & SOP IT', icon: GraduationCap, badge: 'Baru', badgeColor: 'bg-emerald-500 text-white' },
-    { id: 'asset_types', label: 'Jenis Asset', icon: Layers, badge: assetTypes.length },
-    { id: 'locations', label: 'Lokasi', icon: MapPin, badge: locations.length },
-    { id: 'employees', label: 'Karyawan / Aset', icon: Users, badge: employees.length },
-    ...(hasPermission('manage_users')
-      ? [
-          {
-            id: 'user_management',
-            label: 'Kelola User',
-            icon: UserCog,
-            badge: usersList.length,
-            badgeColor: 'bg-indigo-600 text-white',
-          },
-        ]
-      : []),
-    { id: 'maintenance', label: 'Maintenance', icon: Wrench, badge: activeMaintenanceCount > 0 ? activeMaintenanceCount : undefined, badgeColor: 'bg-amber-500 text-white' },
-    { id: 'reports', label: 'Laporan & Export', icon: FileSpreadsheet },
-    { id: 'statistics', label: 'Statistik', icon: BarChart3 },
-    { id: 'notifications', label: 'Notifikasi', icon: Bell, badge: unreadNotifCount > 0 ? unreadNotifCount : undefined, badgeColor: 'bg-rose-500 text-white' },
-    { id: 'settings', label: 'Pengaturan', icon: Settings },
-  ];
+  const isBrilinkOfficer = currentUser?.role === 'petugas_brilink';
+
+  const navItems = isBrilinkOfficer
+    ? [
+        {
+          id: 'edc_brilink',
+          label: 'EDC BRILink',
+          icon: Smartphone,
+          badge: activeEDCSubmissions > 0 ? `${activeEDCSubmissions} Proses` : `${edcMovements.length}`,
+          badgeColor: activeEDCSubmissions > 0 ? 'bg-amber-500 text-white' : 'bg-emerald-600 text-white',
+        },
+        {
+          id: 'tutorial',
+          label: 'Tutorial & SOP BRILink',
+          icon: GraduationCap,
+          badge: 'SOP',
+          badgeColor: 'bg-emerald-500 text-white',
+        },
+        {
+          id: 'notifications',
+          label: 'Notifikasi',
+          icon: Bell,
+          badge: unreadNotifCount > 0 ? unreadNotifCount : undefined,
+          badgeColor: 'bg-rose-500 text-white',
+        },
+      ]
+    : [
+        { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+        { id: 'assets', label: 'Asset', icon: Box, badge: assets.length },
+        {
+          id: 'edc_brilink',
+          label: 'EDC BRILink',
+          icon: Smartphone,
+          badge: activeEDCSubmissions > 0 ? `${activeEDCSubmissions} Proses` : `${edcMovements.length}`,
+          badgeColor: activeEDCSubmissions > 0 ? 'bg-amber-500 text-white' : 'bg-sky-600 text-white',
+        },
+        { id: 'tutorial', label: 'Tutorial & SOP IT', icon: GraduationCap, badge: 'Baru', badgeColor: 'bg-emerald-500 text-white' },
+        { id: 'asset_types', label: 'Jenis Asset', icon: Layers, badge: assetTypes.length },
+        { id: 'locations', label: 'Lokasi', icon: MapPin, badge: locations.length },
+        { id: 'employees', label: 'Karyawan / Aset', icon: Users, badge: employees.length },
+        ...(hasPermission('manage_users')
+          ? [
+              {
+                id: 'user_management',
+                label: 'Kelola User',
+                icon: UserCog,
+                badge: usersList.length,
+                badgeColor: 'bg-indigo-600 text-white',
+              },
+            ]
+          : []),
+        { id: 'maintenance', label: 'Maintenance', icon: Wrench, badge: activeMaintenanceCount > 0 ? activeMaintenanceCount : undefined, badgeColor: 'bg-amber-500 text-white' },
+        { id: 'reports', label: 'Laporan & Export', icon: FileSpreadsheet },
+        { id: 'statistics', label: 'Statistik', icon: BarChart3 },
+        { id: 'notifications', label: 'Notifikasi', icon: Bell, badge: unreadNotifCount > 0 ? unreadNotifCount : undefined, badgeColor: 'bg-rose-500 text-white' },
+        { id: 'settings', label: 'Pengaturan', icon: Settings },
+      ];
 
   return (
     <>
@@ -112,11 +138,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                   LABUAN HEBAT
                 </span>
                 <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
-                  ITAM
+                  {isBrilinkOfficer ? 'BRILINK' : 'ITAM'}
                 </span>
               </div>
               <p className="text-[10px] text-slate-400 font-medium leading-none mt-0.5">
-                IT Asset Management
+                {isBrilinkOfficer ? 'Portal Petugas Agen BRILink' : 'IT Asset Management'}
               </p>
             </div>
           </div>
@@ -131,11 +157,28 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
 
         {/* Navigation Links */}
         <div className="flex-1 overflow-y-auto px-3 py-4 space-y-1">
-          <div className="px-3 pb-2">
+          <div className="px-3 pb-2 flex items-center justify-between">
             <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-              Main Menu
+              {isBrilinkOfficer ? 'Portal Agen BRILink' : 'Main Menu'}
             </span>
+            {isBrilinkOfficer && (
+              <span className="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                FOKUS BRILINK
+              </span>
+            )}
           </div>
+
+          {isBrilinkOfficer && (
+            <div className="mx-2 mb-3 p-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/40 text-[11px] text-emerald-800 dark:text-emerald-200">
+              <p className="font-bold flex items-center gap-1.5">
+                <Smartphone className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                <span>Petugas Agen BRILink</span>
+              </p>
+              <p className="text-[10px] text-emerald-600 dark:text-emerald-300 mt-0.5 leading-snug">
+                Fokus operasional: pendataan keluar masuk & tindak lanjut EDC BRILink.
+              </p>
+            </div>
+          )}
 
           {navItems.map((item) => {
             const Icon = item.icon;

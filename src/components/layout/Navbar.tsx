@@ -18,6 +18,7 @@ import {
   LogOut,
   UserCog,
   ChevronDown,
+  Smartphone,
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { UserRole } from '../../types';
@@ -99,6 +100,13 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, onOpenGlobalSea
       desc: 'Melihat aset, update maintenance, foto',
       icon: Wrench,
       color: 'text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/60',
+    },
+    {
+      role: 'petugas_brilink',
+      title: 'Petugas Agen BRILink',
+      desc: 'Fokus khusus operasional EDC BRILink & pengajuan',
+      icon: Smartphone,
+      color: 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60',
     },
     {
       role: 'viewer',
@@ -233,7 +241,13 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, onOpenGlobalSea
             <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-100/70 dark:bg-slate-950/70 text-xs font-semibold text-slate-700 dark:text-slate-300 shadow-sm select-none" title="Role ditetapkan oleh Administrator">
               <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
               <span className="hidden md:inline uppercase text-[11px] tracking-wider text-slate-400">Role:</span>
-              <span className="capitalize">{currentUser?.role ? currentUser.role.replace('_', ' ') : 'Guest'}</span>
+              <span className="capitalize">
+                {currentUser?.role === 'petugas_brilink'
+                  ? 'Petugas Agen BRILink'
+                  : currentUser?.role
+                  ? currentUser.role.replace('_', ' ')
+                  : 'Guest'}
+              </span>
             </div>
           )}
 

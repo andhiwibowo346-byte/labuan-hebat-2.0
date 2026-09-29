@@ -74,34 +74,44 @@ const MainAppContent: React.FC = () => {
 
         {/* Page Content */}
         <main className="flex-1 p-3 sm:p-4 md:p-6 lg:p-8 max-w-7xl w-full mx-auto pb-24 md:pb-8">
-          {activeTab === 'dashboard' && (
-            <DashboardView
-              onOpenAddModal={handleOpenAddAsset}
-              onOpenQuickExcel={() => handleOpenQuickExcel('assets')}
-            />
+          {currentUser.role === 'petugas_brilink' ? (
+            <>
+              {activeTab === 'tutorial' && <ITTutorialView />}
+              {activeTab === 'notifications' && <NotificationsView />}
+              {activeTab !== 'tutorial' && activeTab !== 'notifications' && <EDCBRILinkView />}
+            </>
+          ) : (
+            <>
+              {activeTab === 'dashboard' && (
+                <DashboardView
+                  onOpenAddModal={handleOpenAddAsset}
+                  onOpenQuickExcel={() => handleOpenQuickExcel('assets')}
+                />
+              )}
+              {activeTab === 'assets' && (
+                <AssetListView
+                  onOpenAddModal={handleOpenAddAsset}
+                  onOpenEditModal={handleOpenEditAsset}
+                  onOpenQuickExcel={() => handleOpenQuickExcel('assets')}
+                />
+              )}
+              {activeTab === 'edc_brilink' && <EDCBRILinkView />}
+              {activeTab === 'tutorial' && <ITTutorialView />}
+              {activeTab === 'asset_types' && <AssetTypeManagerView />}
+              {activeTab === 'locations' && (
+                <LocationManagerView onOpenQuickExcel={() => handleOpenQuickExcel('locations')} />
+              )}
+              {activeTab === 'employees' && (
+                <EmployeeManagerView onOpenQuickExcel={() => handleOpenQuickExcel('employees')} />
+              )}
+              {activeTab === 'maintenance' && <MaintenanceView />}
+              {activeTab === 'reports' && <ReportsExportView />}
+              {activeTab === 'statistics' && <StatisticsView />}
+              {activeTab === 'user_management' && <UserManagerView />}
+              {activeTab === 'notifications' && <NotificationsView />}
+              {activeTab === 'settings' && <SettingsView />}
+            </>
           )}
-          {activeTab === 'assets' && (
-            <AssetListView
-              onOpenAddModal={handleOpenAddAsset}
-              onOpenEditModal={handleOpenEditAsset}
-              onOpenQuickExcel={() => handleOpenQuickExcel('assets')}
-            />
-          )}
-          {activeTab === 'edc_brilink' && <EDCBRILinkView />}
-          {activeTab === 'tutorial' && <ITTutorialView />}
-          {activeTab === 'asset_types' && <AssetTypeManagerView />}
-          {activeTab === 'locations' && (
-            <LocationManagerView onOpenQuickExcel={() => handleOpenQuickExcel('locations')} />
-          )}
-          {activeTab === 'employees' && (
-            <EmployeeManagerView onOpenQuickExcel={() => handleOpenQuickExcel('employees')} />
-          )}
-          {activeTab === 'maintenance' && <MaintenanceView />}
-          {activeTab === 'reports' && <ReportsExportView />}
-          {activeTab === 'statistics' && <StatisticsView />}
-          {activeTab === 'user_management' && <UserManagerView />}
-          {activeTab === 'notifications' && <NotificationsView />}
-          {activeTab === 'settings' && <SettingsView />}
         </main>
       </div>
 
