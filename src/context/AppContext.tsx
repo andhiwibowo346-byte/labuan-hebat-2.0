@@ -217,26 +217,62 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     localStorage.setItem('itam_v6_labuan_units', 'true');
   }
 
-  // Users list with LocalStorage persistence
+  // Users list with LocalStorage persistence & automatic healing
   const [usersList, setUsersList] = useState<UserProfile[]>(() => {
     const saved = localStorage.getItem('itam_users_list');
+    let list: UserProfile[] = [];
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          const cleaned = parsed.filter((u: UserProfile) => !['usr-002', 'usr-003', 'usr-004'].includes(u.id));
-          const hasBrilink = cleaned.some((u: UserProfile) => u.role === 'petugas_brilink');
-          if (!hasBrilink) {
-            const brilinkUser = MOCK_USERS.find((u) => u.role === 'petugas_brilink');
-            if (brilinkUser) cleaned.push(brilinkUser);
-          }
-          return cleaned.length > 0 ? cleaned : MOCK_USERS;
+          list = parsed.filter((u: UserProfile) => !['usr-002', 'usr-003', 'usr-004'].includes(u.id));
         }
       } catch (e) {
         console.error('Failed to parse saved users list', e);
       }
     }
-    return MOCK_USERS;
+    if (list.length === 0) {
+      list = [...MOCK_USERS];
+    }
+
+    // Always ensure Super Admin (usr-001) exists with verified PN: 00385617 and password: admin123
+    const adminIdx = list.findIndex(
+      (u) => u.id === 'usr-001' || u.role === 'super_admin' || u.email === 'admin@labuanhebat.id'
+    );
+    if (adminIdx >= 0) {
+      list[adminIdx] = {
+        ...CURRENT_USER,
+        ...list[adminIdx],
+        nip: '00385617', // Always guarantee PN 00385617
+        role: 'super_admin',
+        status: 'active',
+        password: list[adminIdx].password || 'admin123',
+      };
+    } else {
+      list.unshift(CURRENT_USER);
+    }
+
+    // Always ensure Petugas BRILink exists with verified PN: 00385699
+    const brilinkIdx = list.findIndex((u) => u.role === 'petugas_brilink');
+    const mockBrilink = MOCK_USERS.find((u) => u.role === 'petugas_brilink');
+    if (brilinkIdx >= 0 && mockBrilink) {
+      list[brilinkIdx] = {
+        ...mockBrilink,
+        ...list[brilinkIdx],
+        nip: list[brilinkIdx].nip || '00385699',
+        role: 'petugas_brilink',
+        status: 'active',
+        password: list[brilinkIdx].password || 'admin123',
+      };
+    } else if (mockBrilink) {
+      list.push(mockBrilink);
+    }
+
+    try {
+      localStorage.setItem('itam_users_list', JSON.stringify(list));
+    } catch (e) {}
+
+    return list;
   });
 
   // Current logged in user (starts logged out / null by default)
@@ -256,66 +292,107 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const currentUserName = currentUser?.name || 'Administrator';
 
   const login = (emailOrNip: string, password: string): { success: boolean; message: string; user?: UserProfile } => {
-    const cleanId = (emailOrNip || '').trim().toLowerCase();
-    const cleanPassword = (password || '').trim();
+    const rawId = String(emailOrNip || '').trim();
+    const cleanId = rawId.toLowerCase();
+    const cleanPassword = String(password || '').trim();
 
     if (!cleanId) {
-      return { success: false, message: 'Silakan masukkan Email, PN (Personal Number), atau Username.' };
+      return { success: false, message: 'Silakan masukkan Email atau PN (Personal Number).' };
     }
     if (!cleanPassword) {
       return { success: false, message: 'Silakan masukkan kata sandi.' };
     }
 
-    const match = usersList.find((u) => {
+    // Extract digits and digits without leading zeros (handles e.g. "00385617" vs "385617" or "PN 00385617")
+    const inputDigits = cleanId.replace(/\D/g, '');
+    const inputNoZeros = inputDigits.replace(/^0+/, '');
+
+    // Pool of candidate accounts to search: current usersList + default fallback MOCK_USERS
+    const candidatePool = [...usersList];
+    for (const mockU of MOCK_USERS) {
+      if (!candidatePool.some((u) => u.id === mockU.id)) {
+        candidatePool.push(mockU);
+      }
+    }
+
+    // Step 1: Find user by ANY matching identifier
+    const matchedUser = candidatePool.find((u) => {
       if (!u) return false;
-      const userEmail = (u.email || '').trim().toLowerCase();
-      const userNip = (u.nip || '').trim().toLowerCase();
+      const userEmail = String(u.email || '').trim().toLowerCase();
+      const userNip = String(u.nip || '').trim().toLowerCase();
       const userPrefix = userEmail.split('@')[0];
-      const userName = (u.name || '').trim().toLowerCase();
+      const userName = String(u.name || '').trim().toLowerCase();
 
-      // Check all identifier match possibilities (handles mobile virtual keyboard behaviors)
-      const isEmailMatch = userEmail === cleanId;
-      const isNipMatch = Boolean(userNip && userNip === cleanId);
-      const isPrefixMatch = Boolean(userPrefix && userPrefix === cleanId);
-      const isAdminKeyword = (cleanId === 'admin' || cleanId === 'administrator') && (u.role === 'super_admin' || u.role === 'it_admin');
-      const isNameMatch = userName === cleanId;
+      // Check PN match (with or without leading zeros, or prefixed with PN)
+      if (userNip) {
+        if (userNip === cleanId) return true;
+        const uNipDigits = userNip.replace(/\D/g, '');
+        const uNipNoZeros = uNipDigits.replace(/^0+/, '');
+        if (inputDigits && uNipDigits && inputDigits === uNipDigits) return true;
+        if (inputNoZeros && uNipNoZeros && inputNoZeros === uNipNoZeros) return true;
+      }
 
-      const idMatch = isEmailMatch || isNipMatch || isPrefixMatch || isAdminKeyword || isNameMatch;
-      if (!idMatch) return false;
+      // Special fallback for Super Admin PN 00385617
+      if (u.role === 'super_admin' && (cleanId === '00385617' || inputNoZeros === '385617' || cleanId === 'admin' || cleanId === 'administrator')) {
+        return true;
+      }
 
-      // Check password (handles mobile keyboard trailing space or default admin123)
-      const userPwd = u.password || 'admin123';
-      const isPwdMatch =
-        userPwd === password ||
-        userPwd === cleanPassword ||
-        password === 'admin123' ||
-        cleanPassword === 'admin123';
+      // Special fallback for Petugas BRILink PN 00385699
+      if (u.role === 'petugas_brilink' && (cleanId === '00385699' || inputNoZeros === '385699' || cleanId === 'brilink')) {
+        return true;
+      }
 
-      return isPwdMatch;
+      // Check email exact match
+      if (userEmail === cleanId) return true;
+
+      // Check email prefix match (e.g. "admin" for "admin@labuanhebat.id")
+      if (userPrefix && userPrefix === cleanId) return true;
+
+      // Check name match
+      if (userName === cleanId) return true;
+
+      return false;
     });
 
-    if (!match) {
+    if (!matchedUser) {
       return {
         success: false,
-        message: 'Email/PN atau kata sandi tidak cocok. Silakan periksa kembali.',
+        message: 'Akun dengan Email atau PN tersebut tidak ditemukan. Silakan periksa kembali atau daftar akun baru.',
       };
     }
 
-    if (match.status === 'inactive') {
+    if (matchedUser.status === 'inactive') {
       return { success: false, message: 'Akun ini dinonaktifkan. Silakan hubungi Administrator.' };
     }
 
-    setCurrentUser(match);
-    if (match.role === 'petugas_brilink') {
+    // Step 2: Validate password specifically for the found user
+    const userSavedPwd = String(matchedUser.password || 'admin123').trim();
+    const isPwdMatch =
+      userSavedPwd === password ||
+      userSavedPwd === cleanPassword ||
+      userSavedPwd.toLowerCase() === cleanPassword.toLowerCase() ||
+      // Master admin & BRILink accounts can always accept default admin123
+      ((matchedUser.role === 'super_admin' || matchedUser.id === 'usr-001' || matchedUser.role === 'petugas_brilink') &&
+        (cleanPassword === 'admin123' || password === 'admin123'));
+
+    if (!isPwdMatch) {
+      return {
+        success: false,
+        message: 'Kata sandi yang Anda masukkan salah. Silakan periksa kembali huruf besar dan kecil Anda.',
+      };
+    }
+
+    setCurrentUser(matchedUser);
+    if (matchedUser.role === 'petugas_brilink') {
       setActiveTab('edc_brilink');
     }
     try {
-      localStorage.setItem('itam_auth_user', JSON.stringify(match));
-      localStorage.setItem('itam_user_role', match.role);
+      localStorage.setItem('itam_auth_user', JSON.stringify(matchedUser));
+      localStorage.setItem('itam_user_role', matchedUser.role);
     } catch (e) {
       console.warn('LocalStorage error on mobile browser:', e);
     }
-    return { success: true, message: `Selamat datang kembali, ${match.name}!`, user: match };
+    return { success: true, message: `Selamat datang kembali, ${matchedUser.name}!`, user: matchedUser };
   };
 
   const loginAsUser = (user: UserProfile) => {
