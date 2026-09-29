@@ -379,7 +379,6 @@ export const LoginView: React.FC = () => {
                     onChange={(e) => setRegRole(e.target.value as UserRole)}
                     className="w-full px-3 py-2 bg-slate-950/60 border border-slate-800 rounded-xl text-xs text-white focus:ring-2 focus:ring-brand-500 focus:outline-none"
                   >
-                    <option value="super_admin">Super Admin (Akses Penuh)</option>
                     <option value="it_admin">Admin IT (Kelola Aset & Data)</option>
                     <option value="technician">Teknisi (Maintenance & Servis)</option>
                     <option value="viewer">Viewer (Hanya Melihat)</option>

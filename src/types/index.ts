@@ -222,3 +222,71 @@ export interface TutorialItem {
   created_by?: string;
   created_at?: string;
 }
+
+// ==========================================
+// EDC BRILINK LOGISTICS & SUBMISSIONS TYPES
+// ==========================================
+
+export type EDCMovementType = 'masuk' | 'keluar';
+
+export type EDCCondition = 'baik' | 'rusak_ringan' | 'rusak_total' | 'butuh_inisiasi';
+
+export type EDCSubmissionStatus =
+  | 'pengajuan_masuk'
+  | 'survei_kelayakan'
+  | 'approval_kanca'
+  | 'order_mesin'
+  | 'inisiasi_tid'
+  | 'siap_distribusi'
+  | 'terpasang_aktif'
+  | 'ditolak';
+
+export interface EDCMovementRecord {
+  id: string;
+  type: EDCMovementType; // 'masuk' (pengembalian agen / stok baru) | 'keluar' (pasang ke agen / servis)
+  date: string;
+  serial_number: string;
+  tid: string;
+  mid?: string;
+  model: string; // misal: 'Pax D210', 'Ingenico Move 2500', 'Newland N910'
+  agent_name: string; // Nama Agen BRILink / Merchant
+  agent_code?: string; // No Rekening / ID Agen
+  agent_address: string;
+  agent_phone: string;
+  pic_officer: string; // Petugas IT / Pengelola
+  condition: EDCCondition;
+  accessories: string[]; // ['Adaptor/Charger', 'Kabel Power', 'Thermal Paper', 'Dus Box', 'SIM Card']
+  sim_card_provider?: string;
+  sim_card_number?: string;
+  reason: string; // 'Pemasangan Agen Baru', 'Penggantian Rusak', 'Penarikan Mesin', 'Penerimaan Kantor Wilayah', 'Kirim Servis'
+  notes?: string;
+  created_at: string;
+}
+
+export interface EDCFollowUpLog {
+  id: string;
+  date: string;
+  stage: EDCSubmissionStatus;
+  notes: string;
+  updated_by: string;
+}
+
+export interface EDCSubmission {
+  id: string;
+  applicant_name: string; // Nama Calon Agen
+  business_name: string; // Nama Usaha / Toko
+  nik?: string;
+  phone: string;
+  address: string;
+  bri_unit: string; // BRI Unit Supervisi
+  submission_date: string;
+  status: EDCSubmissionStatus;
+  target_date?: string;
+  assigned_pic: string;
+  notes: string;
+  allocated_sn?: string;
+  allocated_tid?: string;
+  follow_up_history?: EDCFollowUpLog[];
+  created_at: string;
+}
+

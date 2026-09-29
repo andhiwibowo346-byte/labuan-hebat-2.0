@@ -13,6 +13,8 @@ import {
   AssetFieldDefinition,
   TutorialItem,
   ThemeMode,
+  EDCMovementRecord,
+  EDCSubmission,
 } from '../types';
 import {
   CURRENT_USER,
@@ -25,6 +27,8 @@ import {
   INITIAL_ASSET_HISTORY,
   INITIAL_NOTIFICATIONS,
   INITIAL_TUTORIALS,
+  INITIAL_EDC_MOVEMENTS,
+  INITIAL_EDC_SUBMISSIONS,
 } from '../data/mockData';
 
 interface AppContextType {
@@ -98,6 +102,16 @@ interface AppContextType {
   addTutorial: (tutorial: Omit<TutorialItem, 'id' | 'created_at'>) => TutorialItem;
   updateTutorial: (id: string, updated: Partial<TutorialItem>) => void;
   deleteTutorial: (id: string) => void;
+
+  // EDC BRILink Operations
+  edcMovements: EDCMovementRecord[];
+  addEDCMovement: (movement: Omit<EDCMovementRecord, 'id' | 'created_at'>) => EDCMovementRecord;
+  updateEDCMovement: (id: string, data: Partial<EDCMovementRecord>) => void;
+  deleteEDCMovement: (id: string) => void;
+  edcSubmissions: EDCSubmission[];
+  addEDCSubmission: (submission: Omit<EDCSubmission, 'id' | 'created_at' | 'follow_up_history'>) => EDCSubmission;
+  updateEDCSubmission: (id: string, data: Partial<EDCSubmission>, followUpNote?: string) => void;
+  deleteEDCSubmission: (id: string) => void;
 
   assetHistory: AssetHistory[];
   notifications: AppNotification[];
@@ -269,6 +283,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return { success: false, message: 'Email sudah terdaftar pada pengguna lain.' };
     }
 
+    // Enforce security rule: New registered users cannot be super_admin
+    if (newUser.role === 'super_admin') {
+      return {
+        success: false,
+        message: 'Role Super Admin tidak diizinkan untuk akun baru yang didaftarkan. Silakan pilih Admin IT, Teknisi, atau Viewer.',
+      };
+    }
+
     if (newUser.nip) {
       const nipExists = usersList.some((u) => u.nip && u.nip.trim() === newUser.nip?.trim());
       if (nipExists) {
@@ -392,6 +414,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return saved ? JSON.parse(saved) : INITIAL_TUTORIALS;
   });
 
+  // EDC BRILink States
+  const [edcMovements, setEdcMovements] = useState<EDCMovementRecord[]>(() => {
+    const saved = localStorage.getItem('itam_edc_movements');
+    return saved ? JSON.parse(saved) : INITIAL_EDC_MOVEMENTS;
+  });
+
+  const [edcSubmissions, setEdcSubmissions] = useState<EDCSubmission[]>(() => {
+    const saved = localStorage.getItem('itam_edc_submissions');
+    return saved ? JSON.parse(saved) : INITIAL_EDC_SUBMISSIONS;
+  });
+
   // Sync to localStorage
   useEffect(() => {
     localStorage.setItem('itam_asset_types', JSON.stringify(assetTypes));
@@ -424,6 +457,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => {
     localStorage.setItem('itam_tutorials', JSON.stringify(tutorials));
   }, [tutorials]);
+
+  useEffect(() => {
+    localStorage.setItem('itam_edc_movements', JSON.stringify(edcMovements));
+  }, [edcMovements]);
+
+  useEffect(() => {
+    localStorage.setItem('itam_edc_submissions', JSON.stringify(edcSubmissions));
+  }, [edcSubmissions]);
 
   // Asset Types methods
   const addAssetType = (newTypeData: Omit<AssetType, 'id' | 'created_at' | 'updated_at'>): AssetType => {
@@ -1017,6 +1058,87 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setTutorials((prev) => prev.filter((t) => t.id !== id));
   };
 
+  // EDC BRILink Operations
+  const addEDCMovement = (movementData: Omit<EDCMovementRecord, 'id' | 'created_at'>): EDCMovementRecord => {
+    const now = new Date().toISOString();
+    const created: EDCMovementRecord = {
+      ...movementData,
+      id: `edc-mov-${Date.now().toString().slice(-6)}`,
+      created_at: now,
+    };
+    setEdcMovements((prev) => [created, ...prev]);
+    pushNotification({
+      type: 'new_asset',
+      title: `Mutasi EDC ${created.type === 'keluar' ? 'Keluar' : 'Masuk'} Dicatat`,
+      message: `EDC SN ${created.serial_number} (${created.model}) ${created.type === 'keluar' ? 'diserahkan ke' : 'diterima dari'} ${created.agent_name}.`,
+      severity: 'info',
+    });
+    return created;
+  };
+
+  const updateEDCMovement = (id: string, data: Partial<EDCMovementRecord>) => {
+    setEdcMovements((prev) => prev.map((m) => (m.id === id ? { ...m, ...data } : m)));
+  };
+
+  const deleteEDCMovement = (id: string) => {
+    setEdcMovements((prev) => prev.filter((m) => m.id !== id));
+  };
+
+  const addEDCSubmission = (subData: Omit<EDCSubmission, 'id' | 'created_at' | 'follow_up_history'>): EDCSubmission => {
+    const now = new Date().toISOString();
+    const initialLog = {
+      id: `flw-${Date.now()}`,
+      date: new Date().toISOString().replace('T', ' ').slice(0, 16),
+      stage: subData.status || 'pengajuan_masuk',
+      notes: subData.notes || 'Pengajuan baru didaftarkan ke sistem pendataan.',
+      updated_by: currentUserName,
+    };
+    const created: EDCSubmission = {
+      ...subData,
+      id: `edc-sub-${Date.now().toString().slice(-6)}`,
+      follow_up_history: [initialLog],
+      created_at: now,
+    };
+    setEdcSubmissions((prev) => [created, ...prev]);
+    pushNotification({
+      type: 'new_asset',
+      title: 'Pengajuan Baru EDC BRILink',
+      message: `Pengajuan calon agen ${created.applicant_name} (${created.business_name}) berhasil didaftarkan.`,
+      severity: 'info',
+    });
+    return created;
+  };
+
+  const updateEDCSubmission = (id: string, data: Partial<EDCSubmission>, followUpNote?: string) => {
+    setEdcSubmissions((prev) =>
+      prev.map((s) => {
+        if (s.id !== id) return s;
+        let history = s.follow_up_history || [];
+        if (followUpNote || (data.status && data.status !== s.status)) {
+          history = [
+            ...history,
+            {
+              id: `flw-${Date.now()}`,
+              date: new Date().toISOString().replace('T', ' ').slice(0, 16),
+              stage: data.status || s.status,
+              notes: followUpNote || `Status tindak lanjut diperbarui ke: ${data.status}`,
+              updated_by: currentUserName,
+            },
+          ];
+        }
+        return {
+          ...s,
+          ...data,
+          follow_up_history: history,
+        };
+      })
+    );
+  };
+
+  const deleteEDCSubmission = (id: string) => {
+    setEdcSubmissions((prev) => prev.filter((s) => s.id !== id));
+  };
+
   // Notifications
   const markNotificationAsRead = (id: string) => {
     setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
@@ -1045,6 +1167,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     localStorage.removeItem('itam_asset_history');
     localStorage.removeItem('itam_notifications');
     localStorage.removeItem('itam_tutorials');
+    localStorage.removeItem('itam_edc_movements');
+    localStorage.removeItem('itam_edc_submissions');
 
     setAssetTypes(INITIAL_ASSET_TYPES);
     setAssets(INITIAL_ASSETS);
@@ -1054,6 +1178,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setAssetHistory(INITIAL_ASSET_HISTORY);
     setNotifications(INITIAL_NOTIFICATIONS);
     setTutorials(INITIAL_TUTORIALS);
+    setEdcMovements(INITIAL_EDC_MOVEMENTS);
+    setEdcSubmissions(INITIAL_EDC_SUBMISSIONS);
     setSelectedAssetId(null);
   };
 
@@ -1149,6 +1275,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         addTutorial,
         updateTutorial,
         deleteTutorial,
+        edcMovements,
+        addEDCMovement,
+        updateEDCMovement,
+        deleteEDCMovement,
+        edcSubmissions,
+        addEDCSubmission,
+        updateEDCSubmission,
+        deleteEDCSubmission,
         assetHistory,
         notifications,
         markNotificationAsRead,

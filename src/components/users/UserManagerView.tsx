@@ -549,7 +549,6 @@ export const UserManagerView: React.FC = () => {
                     onChange={(e) => setRole(e.target.value as UserRole)}
                     className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-800 dark:text-white focus:ring-2 focus:ring-brand-500 focus:outline-none"
                   >
-                    <option value="super_admin">Super Admin (Akses Penuh)</option>
                     <option value="it_admin">Admin IT (Kelola Aset & Data)</option>
                     <option value="technician">Teknisi IT (Maintenance & Servis)</option>
                     <option value="viewer">Viewer (Read-only)</option>

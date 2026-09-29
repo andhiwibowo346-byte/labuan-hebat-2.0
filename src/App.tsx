@@ -22,6 +22,7 @@ import { PrintLabelsModal } from './components/qr/PrintLabelsModal';
 import { MobileBottomNav } from './components/layout/MobileBottomNav';
 import { LoginView } from './components/auth/LoginView';
 import { UserManagerView } from './components/users/UserManagerView';
+import { EDCBRILinkView } from './components/edc/EDCBRILinkView';
 import { Asset } from './types';
 
 const MainAppContent: React.FC = () => {
@@ -86,6 +87,7 @@ const MainAppContent: React.FC = () => {
               onOpenQuickExcel={() => handleOpenQuickExcel('assets')}
             />
           )}
+          {activeTab === 'edc_brilink' && <EDCBRILinkView />}
           {activeTab === 'tutorial' && <ITTutorialView />}
           {activeTab === 'asset_types' && <AssetTypeManagerView />}
           {activeTab === 'locations' && (

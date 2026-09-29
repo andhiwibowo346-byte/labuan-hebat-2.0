@@ -18,6 +18,7 @@ import {
   Laptop,
   UserCog,
   LogOut,
+  Smartphone,
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 
@@ -43,14 +44,24 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     isDarkMode,
     themeMode,
     setThemeMode,
+    edcMovements,
+    edcSubmissions,
   } = useApp();
 
   const activeMaintenanceCount = maintenanceRecords.filter((m) => m.status === 'in_progress').length;
   const unreadNotifCount = notifications.filter((n) => !n.read).length;
+  const activeEDCSubmissions = edcSubmissions.filter((s) => !['terpasang_aktif', 'ditolak'].includes(s.status)).length;
 
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'assets', label: 'Asset', icon: Box, badge: assets.length },
+    {
+      id: 'edc_brilink',
+      label: 'EDC BRILink',
+      icon: Smartphone,
+      badge: activeEDCSubmissions > 0 ? `${activeEDCSubmissions} Proses` : `${edcMovements.length}`,
+      badgeColor: activeEDCSubmissions > 0 ? 'bg-amber-500 text-white' : 'bg-sky-600 text-white',
+    },
     { id: 'tutorial', label: 'Tutorial & SOP IT', icon: GraduationCap, badge: 'Baru', badgeColor: 'bg-emerald-500 text-white' },
     { id: 'asset_types', label: 'Jenis Asset', icon: Layers, badge: assetTypes.length },
     { id: 'locations', label: 'Lokasi', icon: MapPin, badge: locations.length },
