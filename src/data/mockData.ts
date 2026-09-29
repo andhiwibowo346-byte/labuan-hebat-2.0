@@ -606,32 +606,100 @@ export const INITIAL_ASSET_TYPES: AssetType[] = [
 ];
 
 export const INITIAL_LOCATIONS: LocationNode[] = [
-  // Regions
-  { id: 'loc-reg-1', name: 'DKI Jakarta & Banten', code: 'REG-01', type: 'region', parent_id: null },
-  { id: 'loc-reg-2', name: 'Jawa Barat', code: 'REG-02', type: 'region', parent_id: null },
-  { id: 'loc-reg-3', name: 'Jawa Timur', code: 'REG-03', type: 'region', parent_id: null },
-  { id: 'loc-reg-4', name: 'Jawa Tengah & DIY', code: 'REG-04', type: 'region', parent_id: null },
+  // Level 1: Region Supervisi Utama
+  {
+    id: 'loc-reg-lbn',
+    name: 'Supervisi Kanca BRI Labuan',
+    code: 'KANCA-LBN',
+    type: 'region',
+    parent_id: null,
+    address: 'Jl. Jenderal Sudirman No. 12, Labuan, Pandeglang, Banten',
+  },
 
-  // Areas
-  { id: 'loc-area-1', name: 'Jakarta Pusat', code: 'AREA-JKT-PST', type: 'area', parent_id: 'loc-reg-1' },
-  { id: 'loc-area-2', name: 'Jakarta Selatan', code: 'AREA-JKT-SEL', type: 'area', parent_id: 'loc-reg-1' },
-  { id: 'loc-area-3', name: 'Bandung Raya', code: 'AREA-BDG', type: 'area', parent_id: 'loc-reg-2' },
-  { id: 'loc-area-4', name: 'Surabaya Metropolitan', code: 'AREA-SBY', type: 'area', parent_id: 'loc-reg-3' },
+  // Level 2: Area Kerja
+  {
+    id: 'loc-area-lbn',
+    name: 'Wilayah Operasional Labuan & Sekitarnya',
+    code: 'AREA-LBN',
+    type: 'area',
+    parent_id: 'loc-reg-lbn',
+  },
 
-  // Branches
-  { id: 'loc-br-1', name: 'Kantor Pusat Menara Sudirman', code: 'BR-KP-SDR', type: 'branch', parent_id: 'loc-area-1', address: 'Jl. Jenderal Sudirman Kav. 52-53, Jakarta' },
-  { id: 'loc-br-2', name: 'KC Senayan Trade Center', code: 'BR-KC-SNY', type: 'branch', parent_id: 'loc-area-2', address: 'Jl. Asia Afrika No. 1, Senayan, Jakarta' },
-  { id: 'loc-br-3', name: 'KC Bandung Dago', code: 'BR-KC-DGO', type: 'branch', parent_id: 'loc-area-3', address: 'Jl. Ir. H. Juanda No. 88, Bandung' },
-  { id: 'loc-br-4', name: 'KC Surabaya Darmo', code: 'BR-KC-DRM', type: 'branch', parent_id: 'loc-area-4', address: 'Jl. Raya Darmo No. 45, Surabaya' },
+  // Level 3: Unit Kerja (BO & Unit-Unit)
+  {
+    id: 'loc-br-lbn',
+    name: 'BO LABUAN',
+    code: 'BO-LBN',
+    type: 'branch',
+    parent_id: 'loc-area-lbn',
+    address: 'Jl. Jenderal Sudirman No. 12, Labuan, Pandeglang',
+  },
+  {
+    id: 'loc-br-crg',
+    name: 'UNIT CARINGIN',
+    code: 'UNIT-CRG',
+    type: 'branch',
+    parent_id: 'loc-area-lbn',
+    address: 'Jl. Raya Labuan - Carita Km. 7, Caringin, Pandeglang',
+  },
+  {
+    id: 'loc-br-cbl',
+    name: 'UNIT CIBALIUNG',
+    code: 'UNIT-CBL',
+    type: 'branch',
+    parent_id: 'loc-area-lbn',
+    address: 'Jl. Raya Cibaliung No. 45, Cibaliung, Pandeglang',
+  },
+  {
+    id: 'loc-br-mns',
+    name: 'UNIT MENES',
+    code: 'UNIT-MNS',
+    type: 'branch',
+    parent_id: 'loc-area-lbn',
+    address: 'Jl. Alun-Alun Timur No. 5, Menes, Pandeglang',
+  },
+  {
+    id: 'loc-br-sbg',
+    name: 'UNIT SOBANG',
+    code: 'UNIT-SBG',
+    type: 'branch',
+    parent_id: 'loc-area-lbn',
+    address: 'Jl. Raya Sobang - Panimbang Km. 3, Sobang, Pandeglang',
+  },
+  {
+    id: 'loc-br-cks',
+    name: 'UNIT CIKEUSIK',
+    code: 'UNIT-CKS',
+    type: 'branch',
+    parent_id: 'loc-area-lbn',
+    address: 'Jl. Raya Cikeusik No. 18, Cikeusik, Pandeglang',
+  },
 
-  // Rooms
-  { id: 'loc-rm-1', name: 'Lobby ATM Gallery Utama', code: 'RM-LBY-ATM', type: 'room', parent_id: 'loc-br-1' },
-  { id: 'loc-rm-2', name: 'Data Center & Server Room Lt. 3', code: 'RM-DC-L3', type: 'room', parent_id: 'loc-br-1' },
-  { id: 'loc-rm-3', name: 'IT Engineering & Helpdesk Office Lt. 2', code: 'RM-IT-L2', type: 'room', parent_id: 'loc-br-1' },
-  { id: 'loc-rm-4', name: 'Ruang Operasional & Teller Lt. 1', code: 'RM-OPS-L1', type: 'room', parent_id: 'loc-br-2' },
-  { id: 'loc-rm-5', name: 'ATM Drive-Thru & Gallery Senayan', code: 'RM-ATM-SNY', type: 'room', parent_id: 'loc-br-2' },
-  { id: 'loc-rm-6', name: 'ATM Gallery Dago Outdoor', code: 'RM-ATM-DGO', type: 'room', parent_id: 'loc-br-3' },
-  { id: 'loc-rm-7', name: 'Ruang Server Cabang Darmo', code: 'RM-SRV-DRM', type: 'room', parent_id: 'loc-br-4' },
+  // Level 4: Ruangan di BO LABUAN
+  { id: 'loc-rm-1', name: 'Lobby ATM & CRM Gallery BO Labuan', code: 'RM-LBY-ATM', type: 'room', parent_id: 'loc-br-lbn' },
+  { id: 'loc-rm-2', name: 'Data Center & Server IT Lt. 2', code: 'RM-DC-LBN', type: 'room', parent_id: 'loc-br-lbn' },
+  { id: 'loc-rm-3', name: 'Ruang IT & Helpdesk Kanca', code: 'RM-IT-LBN', type: 'room', parent_id: 'loc-br-lbn' },
+  { id: 'loc-rm-4', name: 'Ruang Operasional & Teller BO Labuan', code: 'RM-OPS-LBN', type: 'room', parent_id: 'loc-br-lbn' },
+
+  // Level 4: Ruangan di UNIT CARINGIN
+  { id: 'loc-rm-crg-1', name: 'Banking Hall & Teller Unit Caringin', code: 'RM-TLR-CRG', type: 'room', parent_id: 'loc-br-crg' },
+  { id: 'loc-rm-crg-2', name: 'Gallery ATM Caringin', code: 'RM-ATM-CRG', type: 'room', parent_id: 'loc-br-crg' },
+
+  // Level 4: Ruangan di UNIT CIBALIUNG
+  { id: 'loc-rm-cbl-1', name: 'Banking Hall & Teller Unit Cibaliung', code: 'RM-TLR-CBL', type: 'room', parent_id: 'loc-br-cbl' },
+  { id: 'loc-rm-cbl-2', name: 'Gallery ATM Cibaliung', code: 'RM-ATM-CBL', type: 'room', parent_id: 'loc-br-cbl' },
+
+  // Level 4: Ruangan di UNIT MENES
+  { id: 'loc-rm-mns-1', name: 'Banking Hall & Teller Unit Menes', code: 'RM-TLR-MNS', type: 'room', parent_id: 'loc-br-mns' },
+  { id: 'loc-rm-mns-2', name: 'Gallery ATM Menes', code: 'RM-ATM-MNS', type: 'room', parent_id: 'loc-br-mns' },
+
+  // Level 4: Ruangan di UNIT SOBANG
+  { id: 'loc-rm-sbg-1', name: 'Banking Hall & Teller Unit Sobang', code: 'RM-TLR-SBG', type: 'room', parent_id: 'loc-br-sbg' },
+  { id: 'loc-rm-sbg-2', name: 'Gallery ATM Sobang', code: 'RM-ATM-SBG', type: 'room', parent_id: 'loc-br-sbg' },
+
+  // Level 4: Ruangan di UNIT CIKEUSIK
+  { id: 'loc-rm-cks-1', name: 'Banking Hall & Teller Unit Cikeusik', code: 'RM-TLR-CKS', type: 'room', parent_id: 'loc-br-cks' },
+  { id: 'loc-rm-cks-2', name: 'Gallery ATM Cikeusik', code: 'RM-ATM-CKS', type: 'room', parent_id: 'loc-br-cks' },
 ];
 
 export const INITIAL_EMPLOYEES: Employee[] = [

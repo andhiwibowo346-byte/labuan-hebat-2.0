@@ -261,7 +261,7 @@ export const LoginView: React.FC = () => {
                     type="text"
                     value={identifier}
                     onChange={(e) => setIdentifier(e.target.value)}
-                    placeholder="nama@perusahaan.co.id, 00385617, atau admin"
+                    placeholder="Email atau PN (Personal Number)"
                     autoCapitalize="none"
                     autoCorrect="off"
                     spellCheck={false}
@@ -287,7 +287,7 @@ export const LoginView: React.FC = () => {
                     type={showPassword ? 'text' : 'password'}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Masukkan kata sandi (default: admin123)"
+                    placeholder="Masukkan kata sandi akun Anda"
                     autoCapitalize="none"
                     autoCorrect="off"
                     spellCheck={false}
@@ -303,22 +303,6 @@ export const LoginView: React.FC = () => {
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
-              </div>
-
-              {/* Quick Fill Button for Mobile / Handphone */}
-              <div className="pt-0.5">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIdentifier('00385617');
-                    setPassword('admin123');
-                    setErrorMessage('');
-                  }}
-                  className="w-full py-2 px-3 rounded-xl border border-brand-500/30 bg-brand-500/10 hover:bg-brand-500/20 active:scale-[0.98] text-brand-300 text-xs font-semibold flex items-center justify-center gap-2 transition-all touch-manipulation"
-                >
-                  <ShieldCheck className="w-3.5 h-3.5 text-brand-400" />
-                  <span>Isi Kredensial Administrator (PN 00385617)</span>
-                </button>
               </div>
 
               <button

@@ -208,6 +208,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     localStorage.setItem('itam_v4_clean_demo', 'clean_v4');
   }
 
+  // Migrate locations to real BRI Labuan units if old mock data is present
+  if (!localStorage.getItem('itam_v6_labuan_units')) {
+    const savedLoc = localStorage.getItem('itam_locations');
+    if (!savedLoc || savedLoc.includes('DKI Jakarta') || savedLoc.includes('Menara Sudirman') || !savedLoc.includes('BO LABUAN')) {
+      localStorage.setItem('itam_locations', JSON.stringify(INITIAL_LOCATIONS));
+    }
+    localStorage.setItem('itam_v6_labuan_units', 'true');
+  }
+
   // Users list with LocalStorage persistence
   const [usersList, setUsersList] = useState<UserProfile[]>(() => {
     const saved = localStorage.getItem('itam_users_list');
@@ -283,7 +292,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (!match) {
       return {
         success: false,
-        message: 'Kombinasi login tidak cocok. Anda dapat masuk menggunakan PN 00385617 atau admin (sandi: admin123).',
+        message: 'Email/PN atau kata sandi tidak cocok. Silakan periksa kembali.',
       };
     }
 
@@ -946,19 +955,78 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const addLocation = (loc: Omit<LocationNode, 'id'>): LocationNode => {
     const newLoc: LocationNode = {
       ...loc,
-      id: `loc-${Date.now()}`,
+      id: `loc-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
       created_at: new Date().toISOString(),
     };
-    setLocations((prev) => [...prev, newLoc]);
+    const nextList = [...locations, newLoc];
+    setLocations(nextList);
+    try {
+      localStorage.setItem('itam_locations', JSON.stringify(nextList));
+    } catch (e) {
+      console.warn('LocalStorage error:', e);
+    }
     return newLoc;
   };
 
   const updateLocation = (id: string, loc: Partial<LocationNode>) => {
-    setLocations((prev) => prev.map((l) => (l.id === id ? { ...l, ...loc } : l)));
+    const nextList = locations.map((l) => (l.id === id ? { ...l, ...loc } : l));
+    setLocations(nextList);
+    try {
+      localStorage.setItem('itam_locations', JSON.stringify(nextList));
+    } catch (e) {
+      console.warn('LocalStorage error:', e);
+    }
   };
 
-  const deleteLocation = (id: string) => {
-    setLocations((prev) => prev.filter((l) => l.id !== id && l.parent_id !== id));
+  const deleteLocation = (id: string): { success: boolean; message: string } => {
+    const target = locations.find((l) => l.id === id);
+    if (!target) return { success: false, message: 'Lokasi tidak ditemukan.' };
+
+    // Find all descendant IDs recursively
+    const idsToDelete = new Set<string>([id]);
+    let prevSize = 0;
+    while (idsToDelete.size > prevSize) {
+      prevSize = idsToDelete.size;
+      locations.forEach((l) => {
+        if (l.parent_id && idsToDelete.has(l.parent_id)) {
+          idsToDelete.add(l.id);
+        }
+      });
+    }
+
+    const nextLocations = locations.filter((l) => !idsToDelete.has(l.id));
+    setLocations(nextLocations);
+    try {
+      localStorage.setItem('itam_locations', JSON.stringify(nextLocations));
+    } catch (e) {
+      console.warn('LocalStorage error:', e);
+    }
+
+    // Unassign deleted locations from any assets
+    setAssets((prev) => {
+      const updated = prev.map((a) =>
+        a.location_id && idsToDelete.has(a.location_id) ? { ...a, location_id: '' } : a
+      );
+      try {
+        localStorage.setItem('itam_assets', JSON.stringify(updated));
+      } catch (e) {}
+      return updated;
+    });
+
+    setNotifications((prev) => [
+      {
+        id: `notif-${Date.now()}`,
+        type: 'missing_location',
+        title: 'Lokasi / Unit Kerja Dihapus',
+        message: `${target.name} (${target.code}) beserta ${idsToDelete.size - 1} sub-lokasi telah dihapus.`,
+        created_at: new Date().toISOString(),
+        read: false,
+        severity: 'info',
+      },
+      ...prev,
+    ]);
+
+    return { success: true, message: `${target.name} berhasil dihapus!` };
   };
 
   const importLocationsBulk = (
