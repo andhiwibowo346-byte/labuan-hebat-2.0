@@ -44,14 +44,34 @@ export function getSupabaseClient(): SupabaseClient | null {
   }
 }
 
-export async function testSupabaseConnection(url: string, anonKey: string): Promise<{ success: boolean; message: string }> {
+export async function testSupabaseConnection(
+  url: string,
+  anonKey: string
+): Promise<{ success: boolean; message: string; schemaReady?: boolean }> {
   try {
     const tempClient = createClient(url, anonKey);
-    const { error } = await tempClient.from('asset_types').select('count', { count: 'exact', head: true });
+    const { error } = await tempClient
+      .from('asset_types')
+      .select('count', { count: 'exact', head: true });
+
     if (error) {
-      return { success: false, message: `Koneksi gagal: ${error.message}` };
+      // Jika pesan berkaitan dengan tabel belum ada (PostgreSQL error 42P01 / relation does not exist)
+      const errStr = (error.message || '').toLowerCase();
+      if (error.code === '42P01' || errStr.includes('does not exist') || errStr.includes('relation')) {
+        return {
+          success: true,
+          schemaReady: false,
+          message:
+            'Koneksi API Supabase BERHASIL! Namun tabel database belum dibuat. Silakan jalankan script supabase_schema.sql di SQL Editor Supabase Anda.',
+        };
+      }
+      return { success: false, message: `Koneksi gagal (${error.code || 'API Error'}): ${error.message}` };
     }
-    return { success: true, message: 'Koneksi ke database Supabase berhasil!' };
+    return {
+      success: true,
+      schemaReady: true,
+      message: 'Koneksi ke database Supabase berhasil & seluruh skema tabel siap digunakan!',
+    };
   } catch (err: any) {
     return { success: false, message: `Kesalahan koneksi: ${err.message || err}` };
   }

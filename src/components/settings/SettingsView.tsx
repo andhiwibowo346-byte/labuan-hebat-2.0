@@ -69,11 +69,23 @@ export const SettingsView: React.FC = () => {
     setTestingStatus({ loading: false });
   };
 
-  const handleCopySchema = () => {
-    const sqlText = `-- Supabase PostgreSQL Schema Script (See supabase_schema.sql in root directory)`;
-    navigator.clipboard.writeText(sqlText);
+  const handleCopySchema = async () => {
+    try {
+      const res = await fetch('/supabase_schema.sql');
+      if (res.ok) {
+        const text = await res.text();
+        await navigator.clipboard.writeText(text);
+        setCopiedSchema(true);
+        setTimeout(() => setCopiedSchema(false), 2500);
+        return;
+      }
+    } catch (e) {
+      console.warn('Fetch schema failed:', e);
+    }
+    const fallbackText = `-- Script migrasi DDL lengkap tersedia di file supabase_schema.sql pada direktori root project.`;
+    navigator.clipboard.writeText(fallbackText);
     setCopiedSchema(true);
-    setTimeout(() => setCopiedSchema(false), 2000);
+    setTimeout(() => setCopiedSchema(false), 2500);
   };
 
   const handleDownloadBackup = () => {
@@ -442,14 +454,33 @@ export const SettingsView: React.FC = () => {
               <span>{testingStatus.loading ? 'Menguji...' : 'Uji & Simpan Koneksi'}</span>
             </button>
           </div>
+
+          {/* Quick Setup Instructions */}
+          <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200/80 dark:border-slate-800 text-xs space-y-2 mt-4">
+            <span className="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+              <Shield className="w-3.5 h-3.5 text-brand-500" />
+              Panduan 3 Langkah Sambung ke Supabase:
+            </span>
+            <ol className="list-decimal list-inside space-y-1.5 text-slate-600 dark:text-slate-400 leading-relaxed text-[11px] sm:text-xs">
+              <li>
+                Buka dashboard <a href="https://supabase.com/dashboard" target="_blank" rel="noreferrer" className="text-brand-500 hover:underline font-semibold">Supabase.com</a> dan buat <strong>New Project</strong>.
+              </li>
+              <li>
+                Di dashboard Supabase, buka menu <strong>SQL Editor</strong> &gt; <strong>New query</strong> &gt; klik tombol <strong>"Salin Seluruh Skrip SQL"</strong> di bawah &gt; paste lalu klik <strong>Run</strong>.
+              </li>
+              <li>
+                Buka <strong>Project Settings (ikon gerigi) &gt; API</strong>, salin <strong>Project URL</strong> dan <strong>anon/public key</strong>, lalu masukkan ke form di atas dan klik <strong>Uji &amp; Simpan Koneksi</strong>.
+              </li>
+            </ol>
+          </div>
         </form>
       </div>
 
       {/* Card 2: Supabase Schema Preview & File Link */}
       <div className="p-6 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm space-y-4">
-        <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800 gap-3">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-indigo-500/10 text-indigo-600 flex items-center justify-center font-bold">
+            <div className="w-10 h-10 rounded-2xl bg-indigo-500/10 text-indigo-600 flex items-center justify-center font-bold shrink-0">
               <FileCode className="w-5 h-5" />
             </div>
             <div>
@@ -462,14 +493,29 @@ export const SettingsView: React.FC = () => {
             </div>
           </div>
 
-          <a
-            href="/supabase_schema.sql"
-            download
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border border-indigo-200/50 text-xs font-bold hover:bg-indigo-100"
-          >
-            <Download className="w-3.5 h-3.5" />
-            <span>Download .sql</span>
-          </a>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={handleCopySchema}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-bold transition-all ${
+                copiedSchema
+                  ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border-emerald-300'
+                  : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700'
+              }`}
+            >
+              {copiedSchema ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+              <span>{copiedSchema ? 'Tersalin ke Clipboard!' : 'Salin Skrip SQL'}</span>
+            </button>
+
+            <a
+              href="/supabase_schema.sql"
+              download="supabase_schema.sql"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border border-indigo-200/50 text-xs font-bold hover:bg-indigo-100"
+            >
+              <Download className="w-3.5 h-3.5" />
+              <span>Download .sql</span>
+            </a>
+          </div>
         </div>
 
         <div className="p-4 rounded-2xl bg-slate-950 text-slate-200 font-mono text-xs overflow-x-auto border border-slate-800 max-h-56">
