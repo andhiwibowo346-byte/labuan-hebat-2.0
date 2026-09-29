@@ -133,7 +133,7 @@ export const QuickExcelImportModal: React.FC<QuickExcelImportModalProps> = ({
       templateData = [
         {
           'Nama Lengkap': 'Ahmad Fauzi',
-          NIP: '198905122015011003',
+          'PN (Personal Number)': '00385610',
           Email: 'ahmad.fauzi@perusahaan.co.id',
           Departemen: 'Information Technology',
           Jabatan: 'IT Support Specialist',
@@ -143,7 +143,7 @@ export const QuickExcelImportModal: React.FC<QuickExcelImportModalProps> = ({
         },
         {
           'Nama Lengkap': 'Siti Rahmawati',
-          NIP: '199203152018022005',
+          'PN (Personal Number)': '00385622',
           Email: 'siti.rahmawati@perusahaan.co.id',
           Departemen: 'Operasional & Layanan',
           Jabatan: 'Supervisor Operasional',
@@ -276,7 +276,14 @@ export const QuickExcelImportModal: React.FC<QuickExcelImportModalProps> = ({
         map[h] = 'warranty_expiry';
       } else if (lower.includes('lokasi') || lower.includes('location') || lower.includes('ruangan')) {
         map[h] = 'location_id';
-      } else if (lower.includes('pengguna') || lower.includes('user') || lower.includes('nip') || lower.includes('karyawan')) {
+      } else if (
+        lower.includes('pengguna') ||
+        lower.includes('user') ||
+        lower.includes('nip') ||
+        lower.includes('pn') ||
+        lower.includes('personal number') ||
+        lower.includes('karyawan')
+      ) {
         map[h] = 'employee_id';
       } else if (lower.includes('catatan') || lower.includes('keterangan') || lower.includes('notes')) {
         map[h] = 'notes';
@@ -449,7 +456,15 @@ export const QuickExcelImportModal: React.FC<QuickExcelImportModalProps> = ({
       rawRows.forEach((row, idx) => {
         const rowNum = idx + 1;
         const name = String(row['Nama Lengkap'] || row['Nama'] || row['name'] || '').trim();
-        const nip = String(row['NIP'] || row['nip'] || `NIP-${Math.floor(100000 + Math.random() * 900000)}`).trim();
+        const nip = String(
+          row['PN'] ||
+          row['pn'] ||
+          row['Personal Number'] ||
+          row['PN (Personal Number)'] ||
+          row['NIP'] ||
+          row['nip'] ||
+          `PN-${Math.floor(100000 + Math.random() * 900000)}`
+        ).trim();
         const email = String(
           row['Email'] || row['email'] || `${name.toLowerCase().replace(/\s+/g, '.')}@perusahaan.co.id`
         ).trim();
@@ -786,7 +801,7 @@ export const QuickExcelImportModal: React.FC<QuickExcelImportModalProps> = ({
                 placeholder={
                   entityType === 'assets'
                     ? `Contoh:\nAsset ID\tNama Aset\tSerial Number\tStatus\tBiaya\tLokasi\tPengguna\nAST-001\tATM Senayan\tSN100234\tactive\t15000000\nAST-002\tPC Teller\tSN100235\tactive\t8500000`
-                    : `Contoh:\nNama Lengkap\tNIP\tEmail\tDepartemen\tJabatan\nBudi Santoso\t1988010101\tbudi@perusahaan.co.id\tIT\tStaf IT`
+                    : `Contoh:\nNama Lengkap\tPN\tEmail\tDepartemen\tJabatan\nBudi Santoso\t00385617\tbudi@bri.co.id\tIT\tStaf IT`
                 }
                 className="w-full h-36 p-3.5 text-xs font-mono rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
               />
@@ -1004,7 +1019,7 @@ export const QuickExcelImportModal: React.FC<QuickExcelImportModalProps> = ({
                       <tr>
                         <th className="p-2.5 pl-4">#</th>
                         <th className="p-2.5">Nama Lengkap</th>
-                        <th className="p-2.5">NIP</th>
+                        <th className="p-2.5">PN (Personal Number)</th>
                         <th className="p-2.5">Email</th>
                         <th className="p-2.5">Departemen</th>
                         <th className="p-2.5 pr-4">Jabatan</th>

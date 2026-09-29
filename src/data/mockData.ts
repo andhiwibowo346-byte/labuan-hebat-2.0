@@ -1579,7 +1579,7 @@ export const INITIAL_TUTORIALS: TutorialItem[] = [
         step: 2,
         title: 'Cetak Dokumen Berita Acara Serah Terima (BAST)',
         description:
-          'Cetak formulir BAST 2 rangkap yang mencantumkan nama, NIP, spesifikasi perangkat, kelengkapan charger/mouse, dan tanggal serah terima.',
+          'Cetak formulir BAST 2 rangkap yang mencantumkan nama, PN (Personal Number), spesifikasi perangkat, kelengkapan charger/mouse, dan tanggal serah terima.',
       },
       {
         step: 3,

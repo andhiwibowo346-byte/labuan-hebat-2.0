@@ -119,7 +119,7 @@ export interface LocationNode {
 
 export interface Employee {
   id: string;
-  employee_id: string; // e.g. NIP "00385617"
+  employee_id: string; // e.g. PN "00385617"
   full_name: string;
   nip: string;
   email: string;

@@ -168,7 +168,7 @@ export const EmployeeManagerView: React.FC<{ onOpenQuickExcel?: () => void }> = 
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Cari nama, NIP, email, jabatan..."
+            placeholder="Cari nama, PN, email, jabatan..."
             className="w-full pl-9 pr-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 text-xs md:text-sm text-slate-800 dark:text-slate-200 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500"
           />
         </div>
@@ -215,7 +215,7 @@ export const EmployeeManagerView: React.FC<{ onOpenQuickExcel?: () => void }> = 
                         {emp.full_name}
                       </h3>
                       <p className="font-mono text-[11px] text-brand-600 dark:text-brand-400 font-bold mt-0.5">
-                        NIP: {emp.nip}
+                        PN: {emp.nip}
                       </p>
                     </div>
                   </div>
@@ -328,7 +328,7 @@ export const EmployeeManagerView: React.FC<{ onOpenQuickExcel?: () => void }> = 
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
-                    NIP / ID Karyawan <span className="text-rose-500">*</span>
+                    PN (Personal Number) <span className="text-rose-500">*</span>
                   </label>
                   <input
                     type="text"

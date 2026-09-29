@@ -56,7 +56,7 @@ export const ReportsExportView: React.FC = () => {
       { id: 'status', label: 'Status' },
       { id: 'location', label: 'Lokasi' },
       { id: 'employee', label: 'Nama Pengguna' },
-      { id: 'nip', label: 'NIP Pengguna' },
+      { id: 'nip', label: 'PN (Personal Number)' },
       { id: 'purchase_date', label: 'Tanggal Pengadaan' },
       { id: 'purchase_cost', label: 'Biaya Pengadaan' },
       { id: 'warranty_expiry', label: 'Batas Garansi' },

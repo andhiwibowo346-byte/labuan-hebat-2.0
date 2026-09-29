@@ -250,7 +250,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     );
 
     if (!match) {
-      return { success: false, message: 'Email/NIP atau kata sandi tidak cocok.' };
+      return { success: false, message: 'Email/PN atau kata sandi tidak cocok.' };
     }
 
     if (match.status === 'inactive') {
@@ -294,7 +294,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (newUser.nip) {
       const nipExists = usersList.some((u) => u.nip && u.nip.trim() === newUser.nip?.trim());
       if (nipExists) {
-        return { success: false, message: 'NIP sudah terdaftar pada pengguna lain.' };
+        return { success: false, message: 'PN (Personal Number) sudah terdaftar pada pengguna lain.' };
       }
     }
 
@@ -340,6 +340,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const switchUserRole = (role: UserRole) => {
+    // Only super_admin can switch/simulate role
+    if (currentUser?.role !== 'super_admin') {
+      return;
+    }
     const match = usersList.find((u) => u.role === role) || {
       ...(currentUser || CURRENT_USER),
       role,
@@ -988,7 +992,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       valid.push({
         ...emp,
         email,
-        nip: emp.nip || `NIP-${Math.floor(100000 + Math.random() * 900000)}`,
+        nip: emp.nip || `PN-${Math.floor(100000 + Math.random() * 900000)}`,
         id: `emp-${Date.now()}-${idx}`,
         created_at: now,
       });

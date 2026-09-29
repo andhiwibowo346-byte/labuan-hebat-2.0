@@ -372,7 +372,7 @@ export const AssetFormModal: React.FC<AssetFormModalProps> = ({
                   <option value="">-- Belum Ditugaskan --</option>
                   {employees.map((emp) => (
                     <option key={emp.id} value={emp.id}>
-                      {emp.full_name} (NIP: {emp.nip}) - {emp.department}
+                      {emp.full_name} (PN: {emp.nip}) - {emp.department}
                     </option>
                   ))}
                 </select>

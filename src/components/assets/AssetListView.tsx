@@ -208,7 +208,7 @@ export const AssetListView: React.FC<AssetListViewProps> = ({
         Status: getStatusLabel(a.status),
         Lokasi: loc?.name || '',
         'Nama Pengguna': emp?.full_name || '',
-        'NIP Pengguna': emp?.nip || '',
+        'PN Pengguna': emp?.nip || '',
         'Biaya Pengadaan': a.purchase_cost || 0,
         'Tanggal Pengadaan': a.purchase_date || '',
         ...(a.custom_values || {}),
@@ -231,7 +231,7 @@ export const AssetListView: React.FC<AssetListViewProps> = ({
         Status: getStatusLabel(a.status),
         Lokasi: loc?.name || '',
         'Nama Pengguna': emp?.full_name || '',
-        'NIP Pengguna': emp?.nip || '',
+        'PN Pengguna': emp?.nip || '',
       };
     });
     exportToCSV(exportData, `ITAM_Aset_${new Date().toISOString().slice(0, 10)}`);
@@ -760,7 +760,7 @@ export const AssetListView: React.FC<AssetListViewProps> = ({
                             <span className="font-medium text-slate-800 dark:text-slate-200">
                               {emp.full_name}
                             </span>
-                            <span className="text-[10px] text-slate-400 block">NIP: {emp.nip}</span>
+                            <span className="text-[10px] text-slate-400 block">PN: {emp.nip}</span>
                           </div>
                         ) : (
                           <span className="text-slate-400 italic">Belum ditugaskan</span>

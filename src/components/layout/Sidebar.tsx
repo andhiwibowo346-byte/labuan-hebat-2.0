@@ -266,7 +266,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                     {currentUser.name}
                   </p>
                   <p className="text-[10px] text-brand-600 dark:text-brand-400 font-medium capitalize mt-0.5 truncate">
-                    {currentUser.role.replace('_', ' ')}
+                    {currentUser.nip ? `PN: ${currentUser.nip} • ` : ''}{currentUser.role.replace('_', ' ')}
                   </p>
                 </div>
               </div>

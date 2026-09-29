@@ -315,7 +315,7 @@ export const UserManagerView: React.FC = () => {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Cari berdasarkan nama, email, NIP, atau departemen..."
+            placeholder="Cari berdasarkan nama, email, PN, atau departemen..."
             className="w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500"
           />
         </div>
@@ -389,7 +389,7 @@ export const UserManagerView: React.FC = () => {
                               )}
                             </div>
                             <span className="text-[11px] text-slate-400">
-                              NIP: {user.nip || '-'}
+                              PN: {user.nip || '-'}
                             </span>
                           </div>
                         </div>
@@ -513,14 +513,14 @@ export const UserManagerView: React.FC = () => {
 
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                    NIP / ID Karyawan
+                    PN (Personal Number)
                   </label>
                   <input
                     type="text"
                     value={nip}
                     onChange={(e) => setNip(e.target.value)}
                     placeholder="00385630"
-                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-800 dark:text-white focus:ring-2 focus:ring-brand-500 focus:outline-none"
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-800 dark:text-white focus:ring-2 focus:ring-brand-500 focus:outline-none font-mono"
                   />
                 </div>
               </div>
@@ -646,13 +646,13 @@ export const UserManagerView: React.FC = () => {
 
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                    NIP / ID Karyawan
+                    PN (Personal Number)
                   </label>
                   <input
                     type="text"
                     value={editNip}
                     onChange={(e) => setEditNip(e.target.value)}
-                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-800 dark:text-white focus:ring-2 focus:ring-brand-500 focus:outline-none"
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-800 dark:text-white focus:ring-2 focus:ring-brand-500 focus:outline-none font-mono"
                   />
                 </div>
               </div>
